@@ -37,8 +37,12 @@ class _NeuButtonState extends State<NeuButton> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? AppColors.darkBg : AppColors.lightBg;
-    final shadowDark = isDark ? AppColors.darkShadowDark : AppColors.lightShadowDark;
-    final shadowLight = isDark ? AppColors.darkShadowLight : AppColors.lightShadowLight;
+    final shadowDark = isDark
+        ? AppColors.darkShadowDark
+        : AppColors.lightShadowDark;
+    final shadowLight = isDark
+        ? AppColors.darkShadowLight
+        : AppColors.lightShadowLight;
 
     return GestureDetector(
       onTapDown: widget.onPressed != null ? _onTapDown : null,
@@ -50,18 +54,36 @@ class _NeuButtonState extends State<NeuButton> {
         curve: Curves.easeInOut,
         width: widget.width,
         height: widget.height,
-        padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        padding:
+            widget.padding ??
+            const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         decoration: BoxDecoration(
           color: bg,
           borderRadius: BorderRadius.circular(widget.borderRadius),
           boxShadow: _isPressed
               ? [
-                  BoxShadow(color: shadowDark, offset: const Offset(2, 2), blurRadius: 5),
-                  BoxShadow(color: shadowLight, offset: const Offset(-2, -2), blurRadius: 5),
+                  BoxShadow(
+                    color: shadowDark,
+                    offset: const Offset(2, 2),
+                    blurRadius: 5,
+                  ),
+                  BoxShadow(
+                    color: shadowLight,
+                    offset: const Offset(-2, -2),
+                    blurRadius: 5,
+                  ),
                 ]
               : [
-                  BoxShadow(color: shadowDark, offset: const Offset(5, 5), blurRadius: 12),
-                  BoxShadow(color: shadowLight, offset: const Offset(-5, -5), blurRadius: 12),
+                  BoxShadow(
+                    color: shadowDark,
+                    offset: const Offset(5, 5),
+                    blurRadius: 12,
+                  ),
+                  BoxShadow(
+                    color: shadowLight,
+                    offset: const Offset(-5, -5),
+                    blurRadius: 12,
+                  ),
                 ],
         ),
         child: Center(

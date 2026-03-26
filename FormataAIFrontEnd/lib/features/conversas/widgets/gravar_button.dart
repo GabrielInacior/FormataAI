@@ -131,8 +131,12 @@ class _GravarButtonState extends State<GravarButton>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isProcessando = context.watch<ConversasStore>().isProcessando;
-    final shadowDark = isDark ? AppColors.darkShadowDark : AppColors.lightShadowDark;
-    final shadowLight = isDark ? AppColors.darkShadowLight : AppColors.lightShadowLight;
+    final shadowDark = isDark
+        ? AppColors.darkShadowDark
+        : AppColors.lightShadowDark;
+    final shadowLight = isDark
+        ? AppColors.darkShadowLight
+        : AppColors.lightShadowLight;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -191,7 +195,10 @@ class _GravarButtonState extends State<GravarButton>
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: _gravando
-                        ? [AppColors.error, AppColors.error.withValues(alpha: 0.7)]
+                        ? [
+                            AppColors.error,
+                            AppColors.error.withValues(alpha: 0.7),
+                          ]
                         : [AppColors.accentLight, AppColors.accent],
                   ),
                   boxShadow: [

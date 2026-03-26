@@ -53,135 +53,137 @@ class PerfilScreen extends StatelessWidget {
                       depth: 1.3,
                       child: CircleAvatar(
                         radius: 46,
-                        backgroundColor: AppColors.accent.withValues(alpha: 0.15),
+                        backgroundColor: AppColors.accent.withValues(
+                          alpha: 0.15,
+                        ),
                         backgroundImage: usuario?.fotoUrl != null
                             ? NetworkImage(usuario!.fotoUrl!)
                             : null,
-                    child: usuario?.fotoUrl == null
-                        ? Text(
-                            usuario?.nome.isNotEmpty == true
-                                ? usuario!.nome[0].toUpperCase()
-                                : '?',
-                            style: const TextStyle(
-                              fontSize: 36,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.accent,
-                            ),
-                          )
-                        : null,
-                  ),
-                )
-                .animate()
-                .fadeIn(duration: 500.ms)
-                .scale(
-                  begin: const Offset(0.9, 0.9),
-                  end: const Offset(1, 1),
-                  duration: 500.ms,
-                  curve: Curves.easeOutBack,
-                ),
-
-            const SizedBox(height: 14),
-
-            Text(
-              usuario?.nome ?? '',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: isDark ? AppColors.darkText : AppColors.lightText,
-              ),
-            ).animate().fadeIn(delay: 200.ms),
-
-            Text(
-              usuario?.email ?? '',
-              style: TextStyle(
-                color: isDark
-                    ? AppColors.darkTextSecondary
-                    : AppColors.lightTextSecondary,
-              ),
-            ).animate().fadeIn(delay: 300.ms),
-
-            if (usuario?.provedor != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.accent.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    usuario!.provedor,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.accent,
+                        child: usuario?.fotoUrl == null
+                            ? Text(
+                                usuario?.nome.isNotEmpty == true
+                                    ? usuario!.nome[0].toUpperCase()
+                                    : '?',
+                                style: const TextStyle(
+                                  fontSize: 36,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.accent,
+                                ),
+                              )
+                            : null,
+                      ),
+                    )
+                    .animate()
+                    .fadeIn(duration: 500.ms)
+                    .scale(
+                      begin: const Offset(0.9, 0.9),
+                      end: const Offset(1, 1),
+                      duration: 500.ms,
+                      curve: Curves.easeOutBack,
                     ),
-                  ),
-                ),
-              ).animate().fadeIn(delay: 400.ms),
 
-            const SizedBox(height: 32),
+                const SizedBox(height: 14),
 
-            // ─── Opções ─────────────────────────────
-            _Secao(
-              titulo: 'Aparência',
-              children: [
-                _OpcaoTile(
-                  icon: isDark
-                      ? Icons.dark_mode_rounded
-                      : Icons.light_mode_rounded,
-                  titulo: 'Tema escuro',
-                  trailing: Switch.adaptive(
-                    value: theme.isDark,
-                    onChanged: (_) => theme.toggle(),
-                    activeTrackColor: AppColors.accent,
+                Text(
+                  usuario?.nome ?? '',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? AppColors.darkText : AppColors.lightText,
                   ),
-                ),
+                ).animate().fadeIn(delay: 200.ms),
+
+                Text(
+                  usuario?.email ?? '',
+                  style: TextStyle(
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.lightTextSecondary,
+                  ),
+                ).animate().fadeIn(delay: 300.ms),
+
+                if (usuario?.provedor != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.accent.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        usuario!.provedor,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.accent,
+                        ),
+                      ),
+                    ),
+                  ).animate().fadeIn(delay: 400.ms),
+
+                const SizedBox(height: 32),
+
+                // ─── Opções ─────────────────────────────
+                _Secao(
+                  titulo: 'Aparência',
+                  children: [
+                    _OpcaoTile(
+                      icon: isDark
+                          ? Icons.dark_mode_rounded
+                          : Icons.light_mode_rounded,
+                      titulo: 'Tema escuro',
+                      trailing: Switch.adaptive(
+                        value: theme.isDark,
+                        onChanged: (_) => theme.toggle(),
+                        activeTrackColor: AppColors.accent,
+                      ),
+                    ),
+                  ],
+                ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.1),
+
+                const SizedBox(height: 16),
+
+                _Secao(
+                  titulo: 'Conta',
+                  children: [
+                    if (usuario?.provedor == 'EMAIL')
+                      _OpcaoTile(
+                        icon: Icons.lock_outline,
+                        titulo: 'Alterar senha',
+                        onTap: () => _alterarSenha(context),
+                      ),
+                    _OpcaoTile(
+                      icon: Icons.logout_rounded,
+                      titulo: 'Sair',
+                      cor: AppColors.warning,
+                      onTap: () => _logout(context),
+                    ),
+                    _OpcaoTile(
+                      icon: Icons.delete_forever_outlined,
+                      titulo: 'Deletar conta',
+                      cor: AppColors.error,
+                      onTap: () => _deletarConta(context),
+                    ),
+                  ],
+                ).animate().fadeIn(delay: 600.ms).slideY(begin: 0.1),
+
+                const SizedBox(height: 32),
+
+                Text(
+                  'FormataAI v1.0.0',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.lightTextSecondary,
+                  ),
+                ).animate().fadeIn(delay: 700.ms),
+
+                const SizedBox(height: 20),
               ],
-            ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.1),
-
-            const SizedBox(height: 16),
-
-            _Secao(
-              titulo: 'Conta',
-              children: [
-                if (usuario?.provedor == 'EMAIL')
-                  _OpcaoTile(
-                    icon: Icons.lock_outline,
-                    titulo: 'Alterar senha',
-                    onTap: () => _alterarSenha(context),
-                  ),
-                _OpcaoTile(
-                  icon: Icons.logout_rounded,
-                  titulo: 'Sair',
-                  cor: AppColors.warning,
-                  onTap: () => _logout(context),
-                ),
-                _OpcaoTile(
-                  icon: Icons.delete_forever_outlined,
-                  titulo: 'Deletar conta',
-                  cor: AppColors.error,
-                  onTap: () => _deletarConta(context),
-                ),
-              ],
-            ).animate().fadeIn(delay: 600.ms).slideY(begin: 0.1),
-
-            const SizedBox(height: 32),
-
-            Text(
-              'FormataAI v1.0.0',
-              style: TextStyle(
-                fontSize: 12,
-                color: isDark
-                    ? AppColors.darkTextSecondary
-                    : AppColors.lightTextSecondary,
-              ),
-            ).animate().fadeIn(delay: 700.ms),
-
-            const SizedBox(height: 20),
-          ],
             ),
           ),
         ),

@@ -59,16 +59,21 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           Text(
                             'Olá, ${auth.usuario?.nome.split(' ').first ?? ''}',
-                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            style: Theme.of(context).textTheme.headlineSmall
+                                ?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  color: isDark ? AppColors.darkText : AppColors.lightText,
+                                  color: isDark
+                                      ? AppColors.darkText
+                                      : AppColors.lightText,
                                 ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             'Transforme áudio em texto',
                             style: TextStyle(
-                              color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                              color: isDark
+                                  ? AppColors.darkTextSecondary
+                                  : AppColors.lightTextSecondary,
                             ),
                           ),
                         ],
@@ -105,15 +110,22 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: NeuContainer(
                   borderRadius: 16,
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 4,
+                  ),
                   child: TextField(
                     controller: _buscaCtrl,
                     onChanged: (v) => store.carregarConversas(busca: v),
-                    style: TextStyle(color: isDark ? AppColors.darkText : AppColors.lightText),
+                    style: TextStyle(
+                      color: isDark ? AppColors.darkText : AppColors.lightText,
+                    ),
                     decoration: InputDecoration(
                       hintText: 'Buscar conversas...',
                       hintStyle: TextStyle(
-                        color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.lightTextSecondary,
                       ),
                       border: InputBorder.none,
                       icon: Icon(Icons.search, color: AppColors.primary),
@@ -129,27 +141,30 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: store.isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : store.conversas.isEmpty
-                        ? _EmptyState()
-                        : RefreshIndicator(
-                            onRefresh: () => store.carregarConversas(),
-                            color: AppColors.accent,
-                            child: ListView.separated(
-                              padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
-                              itemCount: store.conversas.length,
-                              separatorBuilder: (_, __) => const SizedBox(height: 12),
-                              itemBuilder: (_, i) {
-                                final conversa = store.conversas[i];
-                                return ConversaTile(
-                                  conversa: conversa,
-                                  onTap: () => context.push('/conversa/${conversa.id}'),
-                                  onDelete: () => store.deletarConversa(conversa.id),
-                                ).animate().fadeIn(
-                                      delay: Duration(milliseconds: 50 * i),
-                                      duration: 300.ms,
-                                    );
-                              },
-                            ),
-                          ),
+                    ? _EmptyState()
+                    : RefreshIndicator(
+                        onRefresh: () => store.carregarConversas(),
+                        color: AppColors.accent,
+                        child: ListView.separated(
+                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
+                          itemCount: store.conversas.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 12),
+                          itemBuilder: (_, i) {
+                            final conversa = store.conversas[i];
+                            return ConversaTile(
+                              conversa: conversa,
+                              onTap: () =>
+                                  context.push('/conversa/${conversa.id}'),
+                              onDelete: () =>
+                                  store.deletarConversa(conversa.id),
+                            ).animate().fadeIn(
+                              delay: Duration(milliseconds: 50 * i),
+                              duration: 300.ms,
+                            );
+                          },
+                        ),
+                      ),
               ),
             ],
           ),
@@ -194,7 +209,9 @@ class _EmptyState extends StatelessWidget {
           Text(
             'Toque no microfone para começar',
             style: TextStyle(
-              color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.lightTextSecondary,
             ),
           ),
         ],

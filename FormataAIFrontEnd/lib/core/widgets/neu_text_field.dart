@@ -31,17 +31,26 @@ class NeuTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final shadowDark = isDark ? AppColors.darkShadowDark : AppColors.lightShadowDark;
-    final shadowLight = isDark ? AppColors.darkShadowLight : AppColors.lightShadowLight;
+    final shadowDark = isDark
+        ? AppColors.darkShadowDark
+        : AppColors.lightShadowDark;
+    final shadowLight = isDark
+        ? AppColors.darkShadowLight
+        : AppColors.lightShadowLight;
     final textColor = isDark ? AppColors.darkText : AppColors.lightText;
-    final hintColor = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+    final hintColor = isDark
+        ? AppColors.darkTextSecondary
+        : AppColors.lightTextSecondary;
 
     return Container(
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
         borderRadius: BorderRadius.circular(16),
         border: isDark
-            ? Border.all(color: AppColors.darkShadowLight.withValues(alpha: 0.2), width: 0.5)
+            ? Border.all(
+                color: AppColors.darkShadowLight.withValues(alpha: 0.2),
+                width: 0.5,
+              )
             : null,
         boxShadow: [
           BoxShadow(
@@ -79,7 +88,10 @@ class NeuTextField extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide.none,
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 16,
+          ),
         ),
       ),
     );

@@ -25,7 +25,10 @@ class StatsCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: isDark
                       ? AppColors.accent.withValues(alpha: 0.18)
@@ -75,7 +78,9 @@ class StatsCard extends StatelessWidget {
             '${stats.consultasUsadas} de ${stats.limiteConsultas} consultas usadas',
             style: TextStyle(
               fontSize: 12,
-              color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.lightTextSecondary,
             ),
           ),
         ],

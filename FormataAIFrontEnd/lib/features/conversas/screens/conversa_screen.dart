@@ -80,10 +80,15 @@ class _ConversaScreenState extends State<ConversaScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: (isDark ? AppColors.darkSurface : AppColors.lightSurface).withValues(alpha: 0.85),
+        backgroundColor:
+            (isDark ? AppColors.darkSurface : AppColors.lightSurface)
+                .withValues(alpha: 0.85),
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_rounded, color: isDark ? AppColors.darkText : AppColors.lightText),
+          icon: Icon(
+            Icons.arrow_back_ios_rounded,
+            color: isDark ? AppColors.darkText : AppColors.lightText,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -97,13 +102,20 @@ class _ConversaScreenState extends State<ConversaScreen> {
         actions: [
           if (conversa != null)
             PopupMenuButton<String>(
-              icon: Icon(Icons.more_vert, color: isDark ? AppColors.darkText : AppColors.lightText),
+              icon: Icon(
+                Icons.more_vert,
+                color: isDark ? AppColors.darkText : AppColors.lightText,
+              ),
               onSelected: (v) async {
                 if (v == 'favoritar') {
-                  await store.atualizarConversa(conversa.id, {'favoritada': !conversa.favoritada});
+                  await store.atualizarConversa(conversa.id, {
+                    'favoritada': !conversa.favoritada,
+                  });
                   if (mounted) store.selecionarConversa(conversa.id);
                 } else if (v == 'arquivar') {
-                  await store.atualizarConversa(conversa.id, {'arquivada': !conversa.arquivada});
+                  await store.atualizarConversa(conversa.id, {
+                    'arquivada': !conversa.arquivada,
+                  });
                 }
               },
               itemBuilder: (_) => [
@@ -112,7 +124,9 @@ class _ConversaScreenState extends State<ConversaScreen> {
                   child: Row(
                     children: [
                       Icon(
-                        conversa.favoritada ? Icons.star_rounded : Icons.star_outline_rounded,
+                        conversa.favoritada
+                            ? Icons.star_rounded
+                            : Icons.star_outline_rounded,
                         size: 20,
                         color: AppColors.warning,
                       ),
@@ -125,7 +139,11 @@ class _ConversaScreenState extends State<ConversaScreen> {
                   value: 'arquivar',
                   child: Row(
                     children: [
-                      Icon(Icons.archive_outlined, size: 20, color: AppColors.primary),
+                      Icon(
+                        Icons.archive_outlined,
+                        size: 20,
+                        color: AppColors.primary,
+                      ),
                       const SizedBox(width: 8),
                       Text(conversa.arquivada ? 'Desarquivar' : 'Arquivar'),
                     ],
@@ -145,7 +163,7 @@ class _ConversaScreenState extends State<ConversaScreen> {
                 child: store.isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : mensagens.isEmpty
-                        ? _VazioMensagens()
+                    ? _VazioMensagens()
                     : ListView.builder(
                         controller: _scrollCtrl,
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
@@ -157,50 +175,55 @@ class _ConversaScreenState extends State<ConversaScreen> {
                             onCopiar: () => _copiar(msg.conteudo),
                             onCompartilhar: () => _compartilhar(msg.conteudo),
                           ).animate().fadeIn(
-                                delay: Duration(milliseconds: 50 * i),
-                                duration: 300.ms,
-                              );
+                            delay: Duration(milliseconds: 50 * i),
+                            duration: 300.ms,
+                          );
                         },
                       ),
-          ),
-
-          // Processando indicator
-          if (store.isProcessando)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              child: NeuContainer(
-                borderRadius: 12,
-                padding: const EdgeInsets.all(12),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: AppColors.accent,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      'Processando áudio...',
-                      style: TextStyle(
-                        color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
-                ),
               ),
-            ).animate().fadeIn().slideY(begin: 0.2),
 
-          // Gravar
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: GravarButton(conversaId: widget.conversaId),
-          ),
-        ],
+              // Processando indicator
+              if (store.isProcessando)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 8,
+                  ),
+                  child: NeuContainer(
+                    borderRadius: 12,
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.accent,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          'Processando áudio...',
+                          style: TextStyle(
+                            color: isDark
+                                ? AppColors.darkTextSecondary
+                                : AppColors.lightTextSecondary,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ).animate().fadeIn().slideY(begin: 0.2),
+
+              // Gravar
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: GravarButton(conversaId: widget.conversaId),
+              ),
+            ],
           ),
         ),
       ),
@@ -226,7 +249,9 @@ class _VazioMensagens extends StatelessWidget {
           Text(
             'Grave um áudio para começar',
             style: TextStyle(
-              color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.lightTextSecondary,
             ),
           ),
         ],

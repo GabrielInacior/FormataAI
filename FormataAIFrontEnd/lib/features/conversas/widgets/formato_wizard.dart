@@ -95,8 +95,9 @@ class _FormatoWizardSheetState extends State<_FormatoWizardSheet> {
     final bg = isDark ? AppColors.darkBg : AppColors.lightBg;
     final surface = isDark ? AppColors.darkSurface : AppColors.lightSurface;
     final textColor = isDark ? AppColors.darkText : AppColors.lightText;
-    final secondaryText =
-        isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+    final secondaryText = isDark
+        ? AppColors.darkTextSecondary
+        : AppColors.lightTextSecondary;
 
     return Container(
       constraints: BoxConstraints(
@@ -106,7 +107,12 @@ class _FormatoWizardSheetState extends State<_FormatoWizardSheet> {
         color: bg,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         border: isDark
-            ? Border(top: BorderSide(color: AppColors.darkShadowLight.withValues(alpha: 0.3), width: 0.5))
+            ? Border(
+                top: BorderSide(
+                  color: AppColors.darkShadowLight.withValues(alpha: 0.3),
+                  width: 0.5,
+                ),
+              )
             : null,
       ),
       child: Column(
@@ -173,9 +179,9 @@ class _FormatoWizardSheetState extends State<_FormatoWizardSheet> {
                   selected: selected,
                   onTap: () => setState(() => _selecionado = fmt.id),
                 ).animate().fadeIn(
-                      delay: Duration(milliseconds: 50 * i),
-                      duration: 250.ms,
-                    );
+                  delay: Duration(milliseconds: 50 * i),
+                  duration: 250.ms,
+                );
               },
             ),
           ),
@@ -262,13 +268,16 @@ class _FormatoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final surface = isDark ? AppColors.darkSurface : AppColors.lightSurface;
-    final shadowDark =
-        isDark ? AppColors.darkShadowDark : AppColors.lightShadowDark;
-    final shadowLight =
-        isDark ? AppColors.darkShadowLight : AppColors.lightShadowLight;
+    final shadowDark = isDark
+        ? AppColors.darkShadowDark
+        : AppColors.lightShadowDark;
+    final shadowLight = isDark
+        ? AppColors.darkShadowLight
+        : AppColors.lightShadowLight;
     final textColor = isDark ? AppColors.darkText : AppColors.lightText;
-    final secondaryText =
-        isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+    final secondaryText = isDark
+        ? AppColors.darkTextSecondary
+        : AppColors.lightTextSecondary;
 
     return GestureDetector(
       onTap: onTap,
@@ -281,8 +290,11 @@ class _FormatoCard extends StatelessWidget {
           border: selected
               ? Border.all(color: AppColors.accent, width: 2)
               : isDark
-                  ? Border.all(color: AppColors.darkShadowLight.withValues(alpha: 0.2), width: 0.5)
-                  : Border.all(color: Colors.transparent, width: 2),
+              ? Border.all(
+                  color: AppColors.darkShadowLight.withValues(alpha: 0.2),
+                  width: 0.5,
+                )
+              : Border.all(color: Colors.transparent, width: 2),
           boxShadow: selected
               ? [
                   BoxShadow(
@@ -325,10 +337,7 @@ class _FormatoCard extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               formato.descricao,
-              style: TextStyle(
-                fontSize: 11,
-                color: secondaryText,
-              ),
+              style: TextStyle(fontSize: 11, color: secondaryText),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),

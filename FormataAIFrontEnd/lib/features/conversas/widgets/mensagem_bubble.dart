@@ -24,7 +24,9 @@ class MensagemBubble extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
       child: Row(
-        mainAxisAlignment: _isUsuario ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: _isUsuario
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (!_isUsuario) ...[
@@ -35,30 +37,45 @@ class MensagemBubble extends StatelessWidget {
                 color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
                 borderRadius: BorderRadius.circular(11),
                 border: isDark
-                    ? Border.all(color: AppColors.darkShadowLight.withValues(alpha: 0.2), width: 0.5)
+                    ? Border.all(
+                        color: AppColors.darkShadowLight.withValues(alpha: 0.2),
+                        width: 0.5,
+                      )
                     : null,
                 boxShadow: [
                   BoxShadow(
-                    color: (isDark ? AppColors.darkShadowDark : AppColors.lightShadowDark)
-                        .withValues(alpha: isDark ? 0.5 : 0.8),
+                    color:
+                        (isDark
+                                ? AppColors.darkShadowDark
+                                : AppColors.lightShadowDark)
+                            .withValues(alpha: isDark ? 0.5 : 0.8),
                     offset: const Offset(2, 2),
                     blurRadius: 5,
                   ),
                   BoxShadow(
-                    color: (isDark ? AppColors.darkShadowLight : AppColors.lightShadowLight)
-                        .withValues(alpha: isDark ? 0.2 : 0.8),
+                    color:
+                        (isDark
+                                ? AppColors.darkShadowLight
+                                : AppColors.lightShadowLight)
+                            .withValues(alpha: isDark ? 0.2 : 0.8),
                     offset: const Offset(-2, -2),
                     blurRadius: 5,
                   ),
                 ],
               ),
-              child: const Icon(Icons.auto_awesome, size: 16, color: AppColors.accent),
+              child: const Icon(
+                Icons.auto_awesome,
+                size: 16,
+                color: AppColors.accent,
+              ),
             ),
             const SizedBox(width: 8),
           ],
           Flexible(
             child: Column(
-              crossAxisAlignment: _isUsuario ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              crossAxisAlignment: _isUsuario
+                  ? CrossAxisAlignment.end
+                  : CrossAxisAlignment.start,
               children: [
                 // Label
                 Padding(
@@ -68,7 +85,9 @@ class MensagemBubble extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.lightTextSecondary,
                     ),
                   ),
                 ),
@@ -94,7 +113,9 @@ class MensagemBubble extends StatelessWidget {
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.accent.withValues(alpha: isDark ? 0.35 : 0.25),
+                              color: AppColors.accent.withValues(
+                                alpha: isDark ? 0.35 : 0.25,
+                              ),
                               blurRadius: 10,
                               offset: const Offset(0, 4),
                             ),
@@ -122,7 +143,9 @@ class MensagemBubble extends StatelessWidget {
                               SelectableText(
                                 mensagem.conteudo,
                                 style: TextStyle(
-                                  color: isDark ? AppColors.darkText : AppColors.lightText,
+                                  color: isDark
+                                      ? AppColors.darkText
+                                      : AppColors.lightText,
                                   fontSize: 14,
                                   height: 1.5,
                                 ),
@@ -163,7 +186,11 @@ class _AcaoBtn extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
 
-  const _AcaoBtn({required this.icon, required this.label, required this.onTap});
+  const _AcaoBtn({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -174,18 +201,16 @@ class _AcaoBtn extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            size: 14,
-            color: AppColors.accent,
-          ),
+          Icon(icon, size: 14, color: AppColors.accent),
           const SizedBox(width: 4),
           Text(
             label,
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w500,
-              color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.lightTextSecondary,
             ),
           ),
         ],

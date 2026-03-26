@@ -21,13 +21,13 @@ class Conversa {
   });
 
   factory Conversa.fromJson(Map<String, dynamic> json) => Conversa(
-        id: json['id'] as String,
-        titulo: json['titulo'] as String,
-        categoria: json['categoria'] as String? ?? 'OUTRO',
-        favoritada: json['favoritada'] as bool? ?? false,
-        arquivada: json['arquivada'] as bool? ?? false,
-        criadoEm: DateTime.parse(json['criadoEm'] as String),
-      );
+    id: json['id'] as String,
+    titulo: json['titulo'] as String,
+    categoria: json['categoria'] as String? ?? 'OUTRO',
+    favoritada: json['favoritada'] as bool? ?? false,
+    arquivada: json['arquivada'] as bool? ?? false,
+    criadoEm: DateTime.parse(json['criadoEm'] as String),
+  );
 }
 
 /// Modelo de mensagem.
@@ -47,12 +47,12 @@ class Mensagem {
   });
 
   factory Mensagem.fromJson(Map<String, dynamic> json) => Mensagem(
-        id: json['id'] as String,
-        tipo: json['tipo'] as String,
-        conteudo: json['conteudo'] as String? ?? '',
-        transcricao: json['transcricao'] as String?,
-        criadoEm: DateTime.parse(json['criadoEm'] as String),
-      );
+    id: json['id'] as String,
+    tipo: json['tipo'] as String,
+    conteudo: json['conteudo'] as String? ?? '',
+    transcricao: json['transcricao'] as String?,
+    criadoEm: DateTime.parse(json['criadoEm'] as String),
+  );
 }
 
 /// Estatísticas do usuário.
@@ -70,11 +70,11 @@ class Estatisticas {
   });
 
   factory Estatisticas.fromJson(Map<String, dynamic> json) => Estatisticas(
-        consultasUsadas: json['consultasUsadas'] as int,
-        limiteConsultas: json['limiteConsultas'] as int,
-        consultasRestantes: json['consultasRestantes'] as int,
-        plano: json['plano'] as String,
-      );
+    consultasUsadas: json['consultasUsadas'] as int,
+    limiteConsultas: json['limiteConsultas'] as int,
+    consultasRestantes: json['consultasRestantes'] as int,
+    plano: json['plano'] as String,
+  );
 }
 
 /// Store centralizado de conversas e IA.
@@ -113,7 +113,8 @@ class ConversasStore extends ChangeNotifier {
 
       final res = await _api.get('/ia/conversas', queryParameters: params);
       final data = res.data as Map<String, dynamic>;
-      final itens = (data['dados'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+      final itens =
+          (data['dados'] as List?)?.cast<Map<String, dynamic>>() ?? [];
 
       _conversas = itens.map(Conversa.fromJson).toList();
     } on DioException catch (e) {
@@ -124,12 +125,15 @@ class ConversasStore extends ChangeNotifier {
     }
   }
 
-  Future<Conversa?> criarConversa({String titulo = 'Nova conversa', String categoria = 'OUTRO'}) async {
+  Future<Conversa?> criarConversa({
+    String titulo = 'Nova conversa',
+    String categoria = 'OUTRO',
+  }) async {
     try {
-      final res = await _api.post('/ia/conversas', data: {
-        'titulo': titulo,
-        'categoria': categoria,
-      });
+      final res = await _api.post(
+        '/ia/conversas',
+        data: {'titulo': titulo, 'categoria': categoria},
+      );
       final conversa = Conversa.fromJson(res.data as Map<String, dynamic>);
       _conversas.insert(0, conversa);
       _conversaAtual = conversa;
@@ -183,7 +187,8 @@ class ConversasStore extends ChangeNotifier {
     try {
       final res = await _api.get('/ia/conversas/$conversaId/mensagens');
       final data = res.data as Map<String, dynamic>;
-      final itens = (data['dados'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+      final itens =
+          (data['dados'] as List?)?.cast<Map<String, dynamic>>() ?? [];
       _mensagens = itens.map(Mensagem.fromJson).toList();
       notifyListeners();
     } catch (_) {}
@@ -191,12 +196,17 @@ class ConversasStore extends ChangeNotifier {
 
   /// Envia áudio para transcrição + resposta IA.
   /// Retorna o ID da conversa processada (para navegação).
-  Future<String?> processarAudio(String filePath, {String? conversaId, String? formato}) async {
+  Future<String?> processarAudio(
+    String filePath, {
+    String? conversaId,
+    String? formato,
+  }) async {
     _isProcessando = true;
     notifyListeners();
     try {
       // Se não tem conversa, cria uma
-      final cId = conversaId ?? _conversaAtual?.id ?? (await criarConversa())?.id;
+      final cId =
+          conversaId ?? _conversaAtual?.id ?? (await criarConversa())?.id;
       if (cId == null) return null;
 
       final extraFields = <String, dynamic>{};
@@ -213,21 +223,25 @@ class ConversasStore extends ChangeNotifier {
 
       // Adiciona mensagens do usuário e assistente
       if (data['transcricao'] != null) {
-        _mensagens.add(Mensagem(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          tipo: 'USUARIO',
-          conteudo: data['transcricao'] as String,
-          transcricao: data['transcricao'] as String?,
-          criadoEm: DateTime.now(),
-        ));
+        _mensagens.add(
+          Mensagem(
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            tipo: 'USUARIO',
+            conteudo: data['transcricao'] as String,
+            transcricao: data['transcricao'] as String?,
+            criadoEm: DateTime.now(),
+          ),
+        );
       }
       if (data['resposta'] != null) {
-        _mensagens.add(Mensagem(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          tipo: 'ASSISTENTE',
-          conteudo: data['resposta'] as String,
-          criadoEm: DateTime.now(),
-        ));
+        _mensagens.add(
+          Mensagem(
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            tipo: 'ASSISTENTE',
+            conteudo: data['resposta'] as String,
+            criadoEm: DateTime.now(),
+          ),
+        );
       }
 
       // Atualiza lista de conversas
@@ -256,7 +270,8 @@ class ConversasStore extends ChangeNotifier {
 
   String _extrairErro(DioException e) {
     if (e.response?.data is Map) {
-      return (e.response!.data as Map)['erro'] as String? ?? 'Erro desconhecido';
+      return (e.response!.data as Map)['erro'] as String? ??
+          'Erro desconhecido';
     }
     return 'Erro de conexão';
   }

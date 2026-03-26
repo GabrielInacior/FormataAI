@@ -23,9 +23,7 @@ class WaveBackground extends StatelessWidget {
             left: 0,
             right: 0,
             height: 280,
-            child: CustomPaint(
-              painter: _TopWavePainter(isDark: isDark),
-            ),
+            child: CustomPaint(painter: _TopWavePainter(isDark: isDark)),
           ),
           // Onda inferior — fixa no fundo da tela
           Positioned(
@@ -33,9 +31,7 @@ class WaveBackground extends StatelessWidget {
             left: 0,
             right: 0,
             height: 140,
-            child: CustomPaint(
-              painter: _BottomWavePainter(isDark: isDark),
-            ),
+            child: CustomPaint(painter: _BottomWavePainter(isDark: isDark)),
           ),
           // Conteúdo
           child,
@@ -67,14 +63,20 @@ class _TopWavePainter extends CustomPainter {
       ..moveTo(0, 0)
       ..lineTo(0, size.height * 0.65)
       ..cubicTo(
-        size.width * 0.25, size.height * 0.9,
-        size.width * 0.5, size.height * 0.5,
-        size.width * 0.75, size.height * 0.72,
+        size.width * 0.25,
+        size.height * 0.9,
+        size.width * 0.5,
+        size.height * 0.5,
+        size.width * 0.75,
+        size.height * 0.72,
       )
       ..cubicTo(
-        size.width * 0.88, size.height * 0.82,
-        size.width * 0.95, size.height * 0.55,
-        size.width, size.height * 0.6,
+        size.width * 0.88,
+        size.height * 0.82,
+        size.width * 0.95,
+        size.height * 0.55,
+        size.width,
+        size.height * 0.6,
       )
       ..lineTo(size.width, 0)
       ..close();
@@ -90,9 +92,12 @@ class _TopWavePainter extends CustomPainter {
       ..moveTo(0, 0)
       ..lineTo(0, size.height * 0.45)
       ..cubicTo(
-        size.width * 0.35, size.height * 0.7,
-        size.width * 0.65, size.height * 0.2,
-        size.width, size.height * 0.5,
+        size.width * 0.35,
+        size.height * 0.7,
+        size.width * 0.65,
+        size.height * 0.2,
+        size.width,
+        size.height * 0.5,
       )
       ..lineTo(size.width, 0)
       ..close();
@@ -123,9 +128,12 @@ class _BottomWavePainter extends CustomPainter {
       ..moveTo(0, size.height)
       ..lineTo(0, size.height * 0.45)
       ..cubicTo(
-        size.width * 0.3, size.height * 0.15,
-        size.width * 0.6, size.height * 0.65,
-        size.width, size.height * 0.3,
+        size.width * 0.3,
+        size.height * 0.15,
+        size.width * 0.6,
+        size.height * 0.65,
+        size.width,
+        size.height * 0.3,
       )
       ..lineTo(size.width, size.height)
       ..close();

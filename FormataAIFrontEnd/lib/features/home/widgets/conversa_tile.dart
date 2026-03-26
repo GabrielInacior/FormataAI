@@ -56,18 +56,27 @@ class ConversaTile extends StatelessWidget {
                 color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
                 borderRadius: BorderRadius.circular(13),
                 border: isDark
-                    ? Border.all(color: AppColors.darkShadowLight.withValues(alpha: 0.2), width: 0.5)
+                    ? Border.all(
+                        color: AppColors.darkShadowLight.withValues(alpha: 0.2),
+                        width: 0.5,
+                      )
                     : null,
                 boxShadow: [
                   BoxShadow(
-                    color: (isDark ? AppColors.darkShadowDark : AppColors.lightShadowDark)
-                        .withValues(alpha: isDark ? 0.5 : 0.7),
+                    color:
+                        (isDark
+                                ? AppColors.darkShadowDark
+                                : AppColors.lightShadowDark)
+                            .withValues(alpha: isDark ? 0.5 : 0.7),
                     offset: const Offset(2, 2),
                     blurRadius: 5,
                   ),
                   BoxShadow(
-                    color: (isDark ? AppColors.darkShadowLight : AppColors.lightShadowLight)
-                        .withValues(alpha: isDark ? 0.2 : 0.7),
+                    color:
+                        (isDark
+                                ? AppColors.darkShadowLight
+                                : AppColors.lightShadowLight)
+                            .withValues(alpha: isDark ? 0.2 : 0.7),
                     offset: const Offset(-2, -2),
                     blurRadius: 5,
                   ),
@@ -101,14 +110,18 @@ class ConversaTile extends StatelessWidget {
                         conversa.categoria.toLowerCase(),
                         style: TextStyle(
                           fontSize: 12,
-                          color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.lightTextSecondary,
                         ),
                       ),
                       const SizedBox(width: 8),
                       Text(
                         '•',
                         style: TextStyle(
-                          color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.lightTextSecondary,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -116,7 +129,9 @@ class ConversaTile extends StatelessWidget {
                         _tempoPassado(conversa.criadoEm),
                         style: TextStyle(
                           fontSize: 12,
-                          color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.lightTextSecondary,
                         ),
                       ),
                     ],
@@ -127,14 +142,20 @@ class ConversaTile extends StatelessWidget {
             if (conversa.favoritada)
               Padding(
                 padding: const EdgeInsets.only(right: 8),
-                child: Icon(Icons.star_rounded, size: 18, color: AppColors.warning),
+                child: Icon(
+                  Icons.star_rounded,
+                  size: 18,
+                  color: AppColors.warning,
+                ),
               ),
             GestureDetector(
               onTap: () => _confirmarDelete(context),
               child: Icon(
                 Icons.delete_outline,
                 size: 20,
-                color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.lightTextSecondary,
               ),
             ),
           ],
@@ -150,13 +171,19 @@ class ConversaTile extends StatelessWidget {
         title: const Text('Deletar conversa?'),
         content: const Text('Esta ação não pode ser desfeita.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar'),
+          ),
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
               onDelete();
             },
-            child: const Text('Deletar', style: TextStyle(color: AppColors.error)),
+            child: const Text(
+              'Deletar',
+              style: TextStyle(color: AppColors.error),
+            ),
           ),
         ],
       ),

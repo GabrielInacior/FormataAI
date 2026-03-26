@@ -30,8 +30,12 @@ class _NeuPrimaryButtonState extends State<NeuPrimaryButton> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
-      onTapDown: widget.onPressed != null ? (_) => setState(() => _isPressed = true) : null,
-      onTapUp: widget.onPressed != null ? (_) => setState(() => _isPressed = false) : null,
+      onTapDown: widget.onPressed != null
+          ? (_) => setState(() => _isPressed = true)
+          : null,
+      onTapUp: widget.onPressed != null
+          ? (_) => setState(() => _isPressed = false)
+          : null,
       onTapCancel: () => setState(() => _isPressed = false),
       onTap: widget.isLoading ? null : widget.onPressed,
       child: AnimatedContainer(
@@ -54,8 +58,11 @@ class _NeuPrimaryButtonState extends State<NeuPrimaryButton> {
                     blurRadius: 20,
                   ),
                   BoxShadow(
-                    color: (isDark ? AppColors.darkShadowDark : AppColors.lightShadowDark)
-                        .withValues(alpha: 0.3),
+                    color:
+                        (isDark
+                                ? AppColors.darkShadowDark
+                                : AppColors.lightShadowDark)
+                            .withValues(alpha: 0.3),
                     offset: const Offset(4, 4),
                     blurRadius: 10,
                   ),
@@ -66,7 +73,10 @@ class _NeuPrimaryButtonState extends State<NeuPrimaryButton> {
               ? const SizedBox(
                   width: 22,
                   height: 22,
-                  child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    color: Colors.white,
+                  ),
                 )
               : Row(
                   mainAxisSize: MainAxisSize.min,

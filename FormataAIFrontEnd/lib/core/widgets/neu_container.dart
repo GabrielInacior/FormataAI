@@ -29,8 +29,12 @@ class NeuContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
-    final shadowDark = isDark ? AppColors.darkShadowDark : AppColors.lightShadowDark;
-    final shadowLight = isDark ? AppColors.darkShadowLight : AppColors.lightShadowLight;
+    final shadowDark = isDark
+        ? AppColors.darkShadowDark
+        : AppColors.lightShadowDark;
+    final shadowLight = isDark
+        ? AppColors.darkShadowLight
+        : AppColors.lightShadowLight;
 
     final d = depth.clamp(0.0, 2.0);
     final blurPressed = 6.0 * d;
