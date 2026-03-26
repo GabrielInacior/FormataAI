@@ -39,7 +39,6 @@ jobs:
 
   deploy:
     name: Deploy EC2
-    needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
 
@@ -64,16 +63,18 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd /opt/formataai
+            cd /opt/formataai/FormataAI/FormataAIBackend
+
+            git pull
 
             # Rebuild e restart containers
-            sudo docker-compose build --no-cache app
-            sudo docker-compose up -d app
+            docker-compose down
+            docker-compose up -d --build
 
             # Rodar migrations pendentes
-            sudo docker-compose exec -T app npx prisma migrate deploy
+            docker-compose exec -T app npx prisma migrate deploy
 
             # Limpar imagens antigas
-            sudo docker image prune -f
+            docker image prune -f
 
             echo "✅ Deploy concluído!"
