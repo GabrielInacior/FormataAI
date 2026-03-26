@@ -91,6 +91,7 @@ class ConversasStore extends ChangeNotifier {
   Estatisticas? _estatisticas;
   bool _isLoading = false;
   final Map<String, bool> _processando = {};
+  final Map<String, bool> _aguardandoResposta = {};
   String? _erro;
 
   List<Conversa> get conversas => _conversas;
@@ -107,6 +108,10 @@ class ConversasStore extends ChangeNotifier {
   /// Verifica se uma conversa específica está processando.
   bool isConversaProcessando(String conversaId) =>
       _processando[conversaId] ?? false;
+
+  /// Verifica se está aguardando resposta da IA (após transcrição).
+  bool isAguardandoResposta(String conversaId) =>
+      _aguardandoResposta[conversaId] ?? false;
 
   /// Retorna true se o limite de consultas foi atingido.
   bool get limiteAtingido =>
@@ -246,7 +251,8 @@ class ConversasStore extends ChangeNotifier {
 
       final data = res.data as Map<String, dynamic>;
 
-      // Adiciona mensagens do usuário e assistente
+      // Estágio 2: mostra mensagem do usuário + indicador de digitação
+      _processando.remove(cId);
       if (data['transcricao'] != null) {
         _mensagens.add(
           Mensagem(
@@ -259,6 +265,11 @@ class ConversasStore extends ChangeNotifier {
           ),
         );
       }
+      _aguardandoResposta[cId] = true;
+      notifyListeners();
+
+      await Future.delayed(const Duration(milliseconds: 800));
+
       if (data['resposta'] != null) {
         _mensagens.add(
           Mensagem(
@@ -269,6 +280,8 @@ class ConversasStore extends ChangeNotifier {
           ),
         );
       }
+      _aguardandoResposta.remove(cId);
+      notifyListeners();
 
       // Atualiza lista de conversas e estatísticas
       await carregarConversas(silent: true);
@@ -286,6 +299,7 @@ class ConversasStore extends ChangeNotifier {
       return null;
     } finally {
       _processando.remove(cId);
+      _aguardandoResposta.remove(cId);
       notifyListeners();
     }
   }
@@ -330,7 +344,8 @@ class ConversasStore extends ChangeNotifier {
       final data = res.data as Map<String, dynamic>;
       final resultCId = data['conversaId'] as String?;
 
-      // Adiciona mensagens localmente
+      // Estágio 2: mostra mensagem do usuário + indicador de digitação
+      _processando.remove(processKey);
       if (data['transcricao'] != null) {
         _mensagens.add(
           Mensagem(
@@ -342,6 +357,11 @@ class ConversasStore extends ChangeNotifier {
           ),
         );
       }
+      _aguardandoResposta[processKey] = true;
+      notifyListeners();
+
+      await Future.delayed(const Duration(milliseconds: 800));
+
       if (data['resposta'] != null) {
         _mensagens.add(
           Mensagem(
@@ -352,6 +372,8 @@ class ConversasStore extends ChangeNotifier {
           ),
         );
       }
+      _aguardandoResposta.remove(processKey);
+      notifyListeners();
 
       await carregarConversas(silent: true);
       await carregarEstatisticas();
@@ -369,6 +391,7 @@ class ConversasStore extends ChangeNotifier {
       return null;
     } finally {
       _processando.remove(processKey);
+      _aguardandoResposta.remove(processKey);
       notifyListeners();
     }
   }

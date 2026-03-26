@@ -49,6 +49,7 @@ dependencies:
   file_picker: ^10.1.5
   pdf: ^3.11.2
   just_audio: ^0.9.43
+  shared_preferences: ^2.3.5
 
 dev_dependencies:
   flutter_test:

@@ -7,13 +7,16 @@ import 'core/stores/auth_store.dart';
 import 'core/stores/conversas_store.dart';
 import 'core/router/app_router.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const FormataAIApp());
+  final themeStore = ThemeStore();
+  await themeStore.init();
+  runApp(FormataAIApp(themeStore: themeStore));
 }
 
 class FormataAIApp extends StatefulWidget {
-  const FormataAIApp({super.key});
+  final ThemeStore themeStore;
+  const FormataAIApp({super.key, required this.themeStore});
 
   @override
   State<FormataAIApp> createState() => _FormataAIAppState();
@@ -42,7 +45,7 @@ class _FormataAIAppState extends State<FormataAIApp> {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => ThemeStore()),
+        ChangeNotifierProvider.value(value: widget.themeStore),
         ChangeNotifierProvider.value(value: _authStore),
         ChangeNotifierProvider(create: (_) => ConversasStore()),
       ],

@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/stores/conversas_store.dart';
 import '../../../core/widgets/wave_background.dart';
+import '../../../core/widgets/neu_container.dart';
 import '../widgets/gravar_button.dart';
 import '../widgets/mensagem_bubble.dart';
 
@@ -20,7 +21,7 @@ class ConversaScreen extends StatefulWidget {
 
 class _ConversaScreenState extends State<ConversaScreen> {
   final _scrollCtrl = ScrollController();
-  int _lastMsgCount = 0;
+  int _lastItemCount = 0;
   bool _initialLoading = true;
 
   @override
@@ -72,9 +73,13 @@ class _ConversaScreenState extends State<ConversaScreen> {
     final conversa = store.conversaAtual;
     final mensagens = store.mensagens;
 
-    // Scroll ao receber nova mensagem (só quando a contagem muda)
-    if (mensagens.length != _lastMsgCount) {
-      _lastMsgCount = mensagens.length;
+    final showTyping = store.isConversaProcessando(widget.conversaId) ||
+        store.isAguardandoResposta(widget.conversaId);
+    final totalItems = mensagens.length + (showTyping ? 1 : 0);
+
+    // Scroll ao receber nova mensagem ou typing indicator
+    if (totalItems != _lastItemCount) {
+      _lastItemCount = totalItems;
       WidgetsBinding.instance.addPostFrameCallback((_) => _scrollParaFim());
     }
 
@@ -210,22 +215,21 @@ class _ConversaScreenState extends State<ConversaScreen> {
                   // Mensagens
                   Expanded(
                     child:
-                        (_initialLoading ||
-                            store.isLoading ||
-                            (mensagens.isEmpty &&
-                                store.isConversaProcessando(widget.conversaId)))
-                        ? _VazioMensagens(
-                            processando: store.isConversaProcessando(
-                              widget.conversaId,
-                            ),
-                          )
+                        (_initialLoading || store.isLoading)
+                        ? const _VazioMensagens(processando: true)
+                        : (mensagens.isEmpty &&
+                            store.isConversaProcessando(widget.conversaId))
+                        ? const _VazioMensagens(processando: true)
                         : mensagens.isEmpty
                         ? const _VazioMensagens()
                         : ListView.builder(
                             controller: _scrollCtrl,
                             padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
-                            itemCount: mensagens.length,
+                            itemCount: totalItems,
                             itemBuilder: (_, i) {
+                              if (i == mensagens.length) {
+                                return const _TypingIndicator();
+                              }
                               final msg = mensagens[i];
                               return MensagemBubble(
                                 mensagem: msg,
@@ -337,6 +341,124 @@ class _VazioMensagens extends StatelessWidget {
           ),
         ],
       ).animate().fadeIn(duration: 600.ms),
+    );
+  }
+}
+
+/// Indicador de digitação — 3 pontinhos animados no estilo assistente.
+class _TypingIndicator extends StatelessWidget {
+  const _TypingIndicator();
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Ícone IA (mesmo do MensagemBubble)
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+              borderRadius: BorderRadius.circular(11),
+              boxShadow: [
+                BoxShadow(
+                  color: (isDark
+                          ? AppColors.darkShadowDark
+                          : AppColors.lightShadowDark)
+                      .withValues(alpha: isDark ? 0.5 : 0.8),
+                  offset: const Offset(2, 2),
+                  blurRadius: 5,
+                ),
+                BoxShadow(
+                  color: (isDark
+                          ? AppColors.darkShadowLight
+                          : AppColors.lightShadowLight)
+                      .withValues(alpha: isDark ? 0.2 : 0.8),
+                  offset: const Offset(-2, -2),
+                  blurRadius: 5,
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.auto_awesome,
+              size: 16,
+              color: AppColors.accent,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4, left: 4),
+                child: Text(
+                  'FormataAI',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.lightTextSecondary,
+                  ),
+                ),
+              ),
+              NeuContainer(
+                borderRadius: 16,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 14,
+                ),
+                child: const _AnimatedDots(),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ).animate().fadeIn(duration: 300.ms);
+  }
+}
+
+/// 3 pontinhos animados pulsantes.
+class _AnimatedDots extends StatelessWidget {
+  const _AnimatedDots();
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final color =
+        isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(3, (i) {
+        return Container(
+          margin: EdgeInsets.only(right: i < 2 ? 6 : 0),
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
+        )
+            .animate(onPlay: (c) => c.repeat(reverse: true))
+            .scaleXY(
+              begin: 0.5,
+              end: 1.0,
+              delay: Duration(milliseconds: 200 * i),
+              duration: const Duration(milliseconds: 600),
+              curve: Curves.easeInOut,
+            )
+            .fade(
+              begin: 0.3,
+              end: 1.0,
+              delay: Duration(milliseconds: 200 * i),
+              duration: const Duration(milliseconds: 600),
+            );
+      }),
     );
   }
 }
