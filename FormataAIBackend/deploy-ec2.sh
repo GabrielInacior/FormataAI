@@ -15,12 +15,12 @@
 set -euo pipefail
 
 # ─── Variáveis (edite conforme necessário) ───────────
-AWS_REGION="us-east-1"
+AWS_REGION="us-east-2"
 INSTANCE_TYPE="t3.small"         # 2 vCPU, 2GB RAM — suficiente para o app
-AMI_ID="ami-0c02fb55956c7d316"   # Amazon Linux 2023 (us-east-1) — verifique a mais recente
-KEY_NAME="formataai-key"         # Nome da key pair na AWS
+AMI_ID="ami-0c02fb55956c7d316"   # Amazon Linux 2023 (us-east-2) — verifique a mais recente
+KEY_NAME="formataai-key2"         # Nome da key pair na AWS
 SECURITY_GROUP_NAME="formataai-sg"
-INSTANCE_NAME="FormataAI-Backend"
+INSTANCE_NAME="FormataAIBackend"
 
 echo "🚀 Iniciando deploy do FormataAI Backend na AWS EC2..."
 
