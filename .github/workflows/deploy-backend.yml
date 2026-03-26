@@ -1,0 +1,79 @@
+# =====================================================
+# FormataAI Backend — CI/CD para AWS EC2
+# =====================================================
+# Secrets necessários no GitHub:
+#   EC2_HOST          — IP público da EC2
+#   EC2_USER          — ec2-user
+#   EC2_SSH_KEY       — Conteúdo da chave .pem privada
+#   DOCKER_REGISTRY   — (opcional) se usar ECR
+# =====================================================
+
+name: Deploy Backend EC2
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "FormataAIBackend/**"
+
+defaults:
+  run:
+    working-directory: FormataAIBackend
+
+jobs:
+  test:
+    name: Testes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: FormataAIBackend/package-lock.json
+
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm test
+
+  deploy:
+    name: Deploy EC2
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Enviar código para EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "FormataAIBackend/"
+          target: "/opt/formataai"
+          strip_components: 1
+          rm: false
+
+      - name: Build e restart na EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /opt/formataai
+
+            # Rebuild e restart containers
+            sudo docker-compose build --no-cache app
+            sudo docker-compose up -d app
+
+            # Rodar migrations pendentes
+            sudo docker-compose exec -T app npx prisma migrate deploy
+
+            # Limpar imagens antigas
+            sudo docker image prune -f
+
+            echo "✅ Deploy concluído!"

@@ -1,0 +1,89 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "🚀 Dev Server",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["tsx", "src/index.ts"],
+      "cwd": "${workspaceFolder}/FormataAIBackend",
+      "console": "integratedTerminal",
+      "env": { "NODE_ENV": "development" },
+      "preLaunchTask": "Gerar Manifest"
+    },
+    {
+      "name": "📋 Gerar Manifest",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["tsx", "src/core/gerar-manifest.ts"],
+      "cwd": "${workspaceFolder}/FormataAIBackend",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "🧪 Testes com Coverage",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["vitest", "run", "--coverage"],
+      "cwd": "${workspaceFolder}/FormataAIBackend",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "🧪 Testes (Watch)",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["vitest", "--watch"],
+      "cwd": "${workspaceFolder}/FormataAIBackend",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "📊 Analisar Coverage",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["vitest", "run", "--coverage", "--reporter=verbose"],
+      "cwd": "${workspaceFolder}/FormataAIBackend",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "📱 Flutter (Debug)",
+      "type": "dart",
+      "request": "launch",
+      "program": "${workspaceFolder}/FormataAIFrontEnd/lib/main.dart",
+      "cwd": "${workspaceFolder}/FormataAIFrontEnd",
+      "flutterMode": "debug"
+    },
+    {
+      "name": "📱 Flutter (Profile)",
+      "type": "dart",
+      "request": "launch",
+      "program": "${workspaceFolder}/FormataAIFrontEnd/lib/main.dart",
+      "cwd": "${workspaceFolder}/FormataAIFrontEnd",
+      "flutterMode": "profile"
+    },
+    {
+      "name": "📱 Flutter (Release)",
+      "type": "dart",
+      "request": "launch",
+      "program": "${workspaceFolder}/FormataAIFrontEnd/lib/main.dart",
+      "cwd": "${workspaceFolder}/FormataAIFrontEnd",
+      "flutterMode": "release"
+    },
+    {
+      "name": "🧪 Flutter Testes",
+      "type": "dart",
+      "request": "launch",
+      "program": "${workspaceFolder}/FormataAIFrontEnd/test/",
+      "cwd": "${workspaceFolder}/FormataAIFrontEnd"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "🔥 Full Stack (Backend + Flutter)",
+      "configurations": ["🚀 Dev Server", "📱 Flutter (Debug)"]
+    }
+  ]
+}

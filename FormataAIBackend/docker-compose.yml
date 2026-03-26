@@ -1,0 +1,71 @@
+services:
+  app:
+    build: .
+    container_name: formataai-backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - formataai
+
+  db:
+    image: postgres:16-alpine
+    container_name: formataai-db
+    restart: unless-stopped
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-formataai}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-formataai}
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-formataai}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - formataai
+
+  nginx:
+    image: nginx:alpine
+    container_name: formataai-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - certbot-etc:/etc/letsencrypt:ro
+      - certbot-var:/var/lib/letsencrypt
+    depends_on:
+      - app
+    networks:
+      - formataai
+
+  certbot:
+    image: certbot/certbot
+    container_name: formataai-certbot
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do sleep 12h & wait $${!}; certbot renew --quiet; done'"
+    networks:
+      - formataai
+
+volumes:
+  pgdata:
+  certbot-etc:
+  certbot-var:
+
+networks:
+  formataai:
+    driver: bridge

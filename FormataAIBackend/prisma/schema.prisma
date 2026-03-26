@@ -1,0 +1,112 @@
+generator client {
+  provider        = "prisma-client"
+  output          = "../generated/prisma"
+  previewFeatures = ["fullTextSearchPostgres"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Usuários ───────────────────────────────────────────────
+
+model Usuario {
+  id              String    @id @default(uuid())
+  nome            String
+  email           String    @unique
+  senha           String?
+  fotoUrl         String?   @map("foto_url")
+  googleId        String?   @unique @map("google_id")
+  provedor        Provedor  @default(EMAIL)
+  ativo           Boolean   @default(true)
+  consultasUsadas Int       @default(0) @map("consultas_usadas")
+  limiteConsultas Int       @default(50) @map("limite_consultas")
+  plano           Plano     @default(GRATUITO)
+  criadoEm        DateTime  @default(now()) @map("criado_em")
+  atualizadoEm    DateTime  @updatedAt @map("atualizado_em")
+
+  conversas       Conversa[]
+  refreshTokens   RefreshToken[]
+
+  @@map("usuarios")
+}
+
+enum Provedor {
+  EMAIL
+  GOOGLE
+}
+
+enum Plano {
+  GRATUITO
+  PREMIUM
+}
+
+// ─── Refresh Tokens ─────────────────────────────────────────
+
+model RefreshToken {
+  id          String   @id @default(uuid())
+  token       String   @unique
+  usuarioId   String   @map("usuario_id")
+  expiraEm    DateTime @map("expira_em")
+  criadoEm    DateTime @default(now()) @map("criado_em")
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@map("refresh_tokens")
+}
+
+// ─── Conversas ──────────────────────────────────────────────
+//  Cada "conversa" agrupa mensagens de um mesmo fluxo/sessão
+
+model Conversa {
+  id          String          @id @default(uuid())
+  usuarioId   String          @map("usuario_id")
+  titulo      String          @default("Nova conversa")
+  categoria   CategoriaConversa @default(OUTRO)
+  favoritada  Boolean         @default(false)
+  arquivada   Boolean         @default(false)
+  criadoEm    DateTime        @default(now()) @map("criado_em")
+  atualizadoEm DateTime      @updatedAt @map("atualizado_em")
+
+  usuario     Usuario         @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  mensagens   Mensagem[]
+
+  @@index([usuarioId, criadoEm(sort: Desc)])
+  @@index([usuarioId, categoria])
+  @@map("conversas")
+}
+
+enum CategoriaConversa {
+  EMAIL
+  MENSAGEM
+  ORCAMENTO
+  DOCUMENTO
+  OUTRO
+}
+
+// ─── Mensagens ──────────────────────────────────────────────
+//  Cada interação (áudio → transcrição → resposta IA) é uma mensagem
+
+model Mensagem {
+  id            String        @id @default(uuid())
+  conversaId    String        @map("conversa_id")
+  tipo          TipoMensagem
+  audioUrl      String?       @map("audio_url")
+  transcricao   String?
+  intencao      String?
+  conteudo      String        @default("")
+  tokensUsados  Int           @default(0) @map("tokens_usados")
+  modeloUsado   String        @default("gpt-4o-mini") @map("modelo_usado")
+  criadoEm      DateTime      @default(now()) @map("criado_em")
+
+  conversa Conversa @relation(fields: [conversaId], references: [id], onDelete: Cascade)
+
+  @@index([conversaId, criadoEm])
+  @@map("mensagens")
+}
+
+enum TipoMensagem {
+  USUARIO
+  ASSISTENTE
+}

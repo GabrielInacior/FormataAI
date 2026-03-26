@@ -1,0 +1,15 @@
+{
+  "servers": {
+    "formata_ai": {
+      "command": "postgres-mcp",
+      "args": ["--access-mode=unrestricted"],
+      "env": {
+        "DATABASE_URI": "postgresql://postgres:Inacio123@localhost:5432/formataAI"
+      },    
+    },
+      "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest"]
+    }  
+  }
+}

@@ -1,0 +1,13 @@
+node_modules
+dist
+
+# Keep environment variables out of version control
+.env
+
+# Auto-gerado pelo script de manifest
+/manifest.json
+
+/generated/prisma
+
+# Coverage
+/coverage
