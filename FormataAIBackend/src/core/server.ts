@@ -12,6 +12,9 @@ import { requestLoggerMiddleware } from '../middlewares/request-logger.middlewar
 export function criarServidor() {
   const app = express();
 
+  // Confia no proxy reverso (nginx)
+  app.set('trust proxy', 1);
+
   // Segurança
   app.use(helmet());
   app.use(cors());
