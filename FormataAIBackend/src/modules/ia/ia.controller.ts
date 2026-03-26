@@ -295,7 +295,7 @@ export async function reprocessar(req: Request, res: Response) {
       return;
     }
 
-    const { mensagemId, formato } = req.body;
+    const { mensagemId, formato, conversaId: targetConversaId } = req.body;
     if (!mensagemId || !formato) {
       res.status(400).json({ erro: 'mensagemId e formato são obrigatórios' });
       return;
@@ -366,37 +366,47 @@ Responda SEMPRE em JSON com este formato:
     });
 
     const resultadoIA = JSON.parse(completion.choices[0].message.content || '{}');
+    // Garante que resposta é sempre string
+    if (Array.isArray(resultadoIA.resposta)) {
+      resultadoIA.resposta = resultadoIA.resposta.join('\n');
+    }
     const tokensUsados = completion.usage?.total_tokens || 0;
 
-    // Criar nova conversa
-    const categoria = (['EMAIL', 'MENSAGEM', 'ORCAMENTO', 'DOCUMENTO', 'OUTRO'].includes(resultadoIA.categoria)
-      ? resultadoIA.categoria
-      : 'OUTRO') as CategoriaConversa;
+    // Usar conversa existente ou criar nova
+    let usedConversaId = targetConversaId;
 
-    let titulo = resultadoIA.intencao || transcricao.substring(0, 60);
-    try {
-      const tituloResult = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: 'Gere um título CURTO (máximo 6 palavras) e descritivo para uma conversa baseada neste contexto. Responda APENAS com o título, sem aspas nem pontuação final.',
-          },
-          { role: 'user', content: `Intenção: ${resultadoIA.intencao}\nCategoria: ${formato}\nConteúdo: ${transcricao.substring(0, 200)}` },
-        ],
-        max_tokens: 30,
-      });
-      const tituloGerado = tituloResult.choices[0].message.content?.trim();
-      if (tituloGerado && tituloGerado.length > 2) titulo = tituloGerado;
-    } catch {
-      logger.aviso('IA', 'Falha ao gerar título no reprocessamento');
+    if (!usedConversaId) {
+      // Criar nova conversa
+      const categoria = (['EMAIL', 'MENSAGEM', 'ORCAMENTO', 'DOCUMENTO', 'OUTRO'].includes(resultadoIA.categoria)
+        ? resultadoIA.categoria
+        : 'OUTRO') as CategoriaConversa;
+
+      let titulo = resultadoIA.intencao || transcricao.substring(0, 60);
+      try {
+        const tituloResult = await openai.chat.completions.create({
+          model: 'gpt-4o-mini',
+          messages: [
+            {
+              role: 'system',
+              content: 'Gere um título CURTO (máximo 6 palavras) e descritivo para uma conversa baseada neste contexto. Responda APENAS com o título, sem aspas nem pontuação final.',
+            },
+            { role: 'user', content: `Intenção: ${resultadoIA.intencao}\nCategoria: ${formato}\nConteúdo: ${transcricao.substring(0, 200)}` },
+          ],
+          max_tokens: 30,
+        });
+        const tituloGerado = tituloResult.choices[0].message.content?.trim();
+        if (tituloGerado && tituloGerado.length > 2) titulo = tituloGerado;
+      } catch {
+        logger.aviso('IA', 'Falha ao gerar título no reprocessamento');
+      }
+
+      const novaConversa = await iaRepository.criarConversa({ usuarioId, titulo, categoria });
+      usedConversaId = novaConversa.id;
     }
-
-    const novaConversa = await iaRepository.criarConversa({ usuarioId, titulo, categoria });
 
     // Salvar mensagem do usuário (reutiliza transcrição, sem áudio)
     await iaRepository.criarMensagem({
-      conversaId: novaConversa.id,
+      conversaId: usedConversaId,
       tipo: 'USUARIO',
       transcricao,
       conteudo: transcricao,
@@ -404,7 +414,7 @@ Responda SEMPRE em JSON com este formato:
 
     // Salvar resposta da IA
     const mensagemIA = await iaRepository.criarMensagem({
-      conversaId: novaConversa.id,
+      conversaId: usedConversaId,
       tipo: 'ASSISTENTE',
       intencao: resultadoIA.intencao,
       conteudo: resultadoIA.resposta || '',
@@ -415,7 +425,7 @@ Responda SEMPRE em JSON com este formato:
     await usuariosRepository.incrementarConsultas(usuarioId);
 
     res.json({
-      conversaId: novaConversa.id,
+      conversaId: usedConversaId,
       mensagemId: mensagemIA.id,
       transcricao,
       intencao: resultadoIA.intencao,

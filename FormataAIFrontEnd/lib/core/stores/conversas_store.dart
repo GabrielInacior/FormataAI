@@ -119,9 +119,11 @@ class ConversasStore extends ChangeNotifier {
 
   // ─── Conversas ────────────────────────────────
 
-  Future<void> carregarConversas({int pagina = 1, String? busca}) async {
-    _isLoading = true;
-    notifyListeners();
+  Future<void> carregarConversas({int pagina = 1, String? busca, bool silent = false}) async {
+    if (!silent) {
+      _isLoading = true;
+      notifyListeners();
+    }
     try {
       final params = <String, dynamic>{'pagina': pagina, 'limite': 20};
       if (busca != null && busca.isNotEmpty) params['busca'] = busca;
@@ -135,7 +137,7 @@ class ConversasStore extends ChangeNotifier {
     } on DioException catch (e) {
       _erro = _extrairErro(e);
     } finally {
-      _isLoading = false;
+      if (!silent) _isLoading = false;
       notifyListeners();
     }
   }
@@ -182,7 +184,7 @@ class ConversasStore extends ChangeNotifier {
   Future<void> atualizarConversa(String id, Map<String, dynamic> dados) async {
     try {
       await _api.put('/ia/conversas/$id', data: dados);
-      await carregarConversas();
+      await carregarConversas(silent: true);
     } catch (_) {}
   }
 
@@ -269,7 +271,7 @@ class ConversasStore extends ChangeNotifier {
       }
 
       // Atualiza lista de conversas e estatísticas
-      await carregarConversas();
+      await carregarConversas(silent: true);
       await carregarEstatisticas();
       // Atualiza a conversa atual (título pode ter mudado)
       await selecionarConversa(cId, silent: true);
@@ -301,27 +303,62 @@ class ConversasStore extends ChangeNotifier {
   // ─── Reprocessar ──────────────────────────────
 
   /// Reutiliza uma transcrição existente com um novo formato.
-  /// Cria uma nova conversa e retorna o ID dela.
-  Future<String?> reprocessarAudio(String mensagemId, String formato) async {
+  /// Se conversaId for passado, adiciona na mesma conversa.
+  Future<String?> reprocessarAudio(
+    String mensagemId,
+    String formato, {
+    String? conversaId,
+  }) async {
     if (limiteAtingido) {
       _erro = 'Limite diário de consultas atingido. Tente novamente amanhã.';
       notifyListeners();
       return null;
     }
 
-    _processando['reprocessar_$mensagemId'] = true;
+    final cId = conversaId ?? _conversaAtual?.id;
+    final processKey = cId ?? 'reprocessar_$mensagemId';
+    _processando[processKey] = true;
     notifyListeners();
     try {
-      final res = await _api.post(
-        '/ia/reprocessar',
-        data: {'mensagemId': mensagemId, 'formato': formato},
-      );
-      final data = res.data as Map<String, dynamic>;
-      final cId = data['conversaId'] as String?;
+      final body = <String, dynamic>{
+        'mensagemId': mensagemId,
+        'formato': formato,
+      };
+      if (cId != null) body['conversaId'] = cId;
 
-      await carregarConversas();
+      final res = await _api.post('/ia/reprocessar', data: body);
+      final data = res.data as Map<String, dynamic>;
+      final resultCId = data['conversaId'] as String?;
+
+      // Adiciona mensagens localmente
+      if (data['transcricao'] != null) {
+        _mensagens.add(
+          Mensagem(
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            tipo: 'USUARIO',
+            conteudo: data['transcricao'] as String,
+            transcricao: data['transcricao'] as String?,
+            criadoEm: DateTime.now(),
+          ),
+        );
+      }
+      if (data['resposta'] != null) {
+        _mensagens.add(
+          Mensagem(
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            tipo: 'ASSISTENTE',
+            conteudo: data['resposta'] as String,
+            criadoEm: DateTime.now(),
+          ),
+        );
+      }
+
+      await carregarConversas(silent: true);
       await carregarEstatisticas();
-      return cId;
+      if (resultCId != null) {
+        await selecionarConversa(resultCId, silent: true);
+      }
+      return resultCId;
     } on DioException catch (e) {
       if (e.response?.statusCode == 429) {
         _erro = 'Limite diário de consultas atingido. Tente novamente amanhã.';
@@ -331,7 +368,7 @@ class ConversasStore extends ChangeNotifier {
       }
       return null;
     } finally {
-      _processando.remove('reprocessar_$mensagemId');
+      _processando.remove(processKey);
       notifyListeners();
     }
   }

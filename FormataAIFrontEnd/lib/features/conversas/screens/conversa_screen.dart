@@ -21,12 +21,14 @@ class ConversaScreen extends StatefulWidget {
 class _ConversaScreenState extends State<ConversaScreen> {
   final _scrollCtrl = ScrollController();
   int _lastMsgCount = 0;
+  bool _initialLoading = true;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ConversasStore>().selecionarConversa(widget.conversaId);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await context.read<ConversasStore>().selecionarConversa(widget.conversaId);
+      if (mounted) setState(() => _initialLoading = false);
     });
   }
 
@@ -208,7 +210,8 @@ class _ConversaScreenState extends State<ConversaScreen> {
                   // Mensagens
                   Expanded(
                     child:
-                        (store.isLoading ||
+                        (_initialLoading ||
+                            store.isLoading ||
                             (mensagens.isEmpty &&
                                 store.isConversaProcessando(widget.conversaId)))
                         ? _VazioMensagens(
