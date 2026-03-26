@@ -158,42 +158,43 @@ class _ConversaScreenState extends State<ConversaScreen> {
             child: SafeArea(
               top: true,
               child: Column(
-            children: [
-              // Banner de processamento — visível e amigável
-              if (store.isConversaProcessando(widget.conversaId))
-                _ProcessandoBanner(isDark: isDark),
+                children: [
+                  // Banner de processamento — visível e amigável
+                  if (store.isConversaProcessando(widget.conversaId))
+                    _ProcessandoBanner(isDark: isDark),
 
-              // Mensagens
-              Expanded(
-                child: store.isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : mensagens.isEmpty
-                    ? _VazioMensagens(
-                        processando: store.isConversaProcessando(
-                          widget.conversaId,
-                        ),
-                      )
-                    : ListView.builder(
-                        controller: _scrollCtrl,
-                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
-                        itemCount: mensagens.length,
-                        itemBuilder: (_, i) {
-                          final msg = mensagens[i];
-                          return MensagemBubble(
-                            mensagem: msg,
-                            onCopiar: () => _copiar(msg.conteudo),
-                            onCompartilhar: () => _compartilhar(msg.conteudo),
-                          ).animate().fadeIn(
-                            delay: Duration(milliseconds: 50 * i),
-                            duration: 300.ms,
-                          );
-                        },
-                      ),
+                  // Mensagens
+                  Expanded(
+                    child: store.isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : mensagens.isEmpty
+                        ? _VazioMensagens(
+                            processando: store.isConversaProcessando(
+                              widget.conversaId,
+                            ),
+                          )
+                        : ListView.builder(
+                            controller: _scrollCtrl,
+                            padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
+                            itemCount: mensagens.length,
+                            itemBuilder: (_, i) {
+                              final msg = mensagens[i];
+                              return MensagemBubble(
+                                mensagem: msg,
+                                onCopiar: () => _copiar(msg.conteudo),
+                                onCompartilhar: () =>
+                                    _compartilhar(msg.conteudo),
+                              ).animate().fadeIn(
+                                delay: Duration(milliseconds: 50 * i),
+                                duration: 300.ms,
+                              );
+                            },
+                          ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
           Positioned(
             bottom: 0,
             left: 0,

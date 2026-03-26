@@ -312,170 +312,184 @@ class _GravarButtonState extends State<GravarButton>
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   // Timer
-        if (_gravando)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-            margin: const EdgeInsets.only(bottom: 14),
-            decoration: BoxDecoration(
-              color: AppColors.error.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                      width: 10,
-                      height: 10,
-                      decoration: const BoxDecoration(
-                        color: AppColors.error,
-                        shape: BoxShape.circle,
+                  if (_gravando)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 8,
                       ),
-                    )
-                    .animate(onPlay: (c) => c.repeat(reverse: true))
-                    .fadeIn(duration: 600.ms),
-                const SizedBox(width: 10),
-                Text(
-                  _formatarTempo(_segundos),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.error,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
-          ).animate().fadeIn().slideY(begin: 0.3),
+                      margin: const EdgeInsets.only(bottom: 14),
+                      decoration: BoxDecoration(
+                        color: AppColors.error.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                                width: 10,
+                                height: 10,
+                                decoration: const BoxDecoration(
+                                  color: AppColors.error,
+                                  shape: BoxShape.circle,
+                                ),
+                              )
+                              .animate(onPlay: (c) => c.repeat(reverse: true))
+                              .fadeIn(duration: 600.ms),
+                          const SizedBox(width: 10),
+                          Text(
+                            _formatarTempo(_segundos),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.error,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ).animate().fadeIn().slideY(begin: 0.3),
 
-        // Botões: upload + gravar (mic sempre exatamente centralizado)
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // Botão upload de arquivo
-            if (!_gravando)
-              GestureDetector(
-                onTap: (isProcessando || limiteAtingido)
-                    ? null
-                    : _enviarArquivo,
-                child: Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isDark
-                        ? AppColors.darkSurface
-                        : AppColors.lightSurface,
-                    boxShadow: [
-                      BoxShadow(
-                        color: shadowDark.withValues(alpha: 0.5),
-                        blurRadius: 8,
-                        offset: const Offset(3, 3),
+                  // Botões: upload + gravar (mic sempre exatamente centralizado)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // Botão upload de arquivo
+                      if (!_gravando)
+                        GestureDetector(
+                          onTap: (isProcessando || limiteAtingido)
+                              ? null
+                              : _enviarArquivo,
+                          child: Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: isDark
+                                  ? AppColors.darkSurface
+                                  : AppColors.lightSurface,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: shadowDark.withValues(alpha: 0.5),
+                                  blurRadius: 8,
+                                  offset: const Offset(3, 3),
+                                ),
+                                BoxShadow(
+                                  color: shadowLight.withValues(alpha: 0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(-3, -3),
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              Icons.attach_file_rounded,
+                              color: (isProcessando || limiteAtingido)
+                                  ? (isDark
+                                        ? AppColors.darkTextSecondary
+                                        : AppColors.lightTextSecondary)
+                                  : AppColors.accent,
+                              size: 22,
+                            ),
+                          ),
+                        ),
+
+                      // Espaçamento entre upload e mic
+                      if (!_gravando) const SizedBox(width: 16),
+
+                      // Botão neumórfico 3D (gravar)
+                      SizedBox(
+                        width: 84,
+                        height: 84,
+                        child: AnimatedBuilder(
+                          animation: _pulseCtrl,
+                          builder: (context, child) {
+                            final scale = _gravando
+                                ? 1.0 + _pulseCtrl.value * 0.1
+                                : 1.0;
+                            return Transform.scale(scale: scale, child: child);
+                          },
+                          child: GestureDetector(
+                            onTap: (isProcessando || limiteAtingido)
+                                ? null
+                                : _toggleGravar,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: _gravando
+                                      ? [
+                                          AppColors.error,
+                                          AppColors.error.withValues(
+                                            alpha: 0.7,
+                                          ),
+                                        ]
+                                      : [
+                                          AppColors.accentLight,
+                                          AppColors.accent,
+                                        ],
+                                ),
+                                boxShadow: [
+                                  // Sombra colorida (glow)
+                                  BoxShadow(
+                                    color:
+                                        (_gravando
+                                                ? AppColors.error
+                                                : AppColors.accent)
+                                            .withValues(alpha: 0.5),
+                                    blurRadius: _gravando ? 30 : 22,
+                                    offset: const Offset(0, 6),
+                                  ),
+                                  // Sombra neumórfica escura
+                                  BoxShadow(
+                                    color: shadowDark.withValues(alpha: 0.6),
+                                    blurRadius: 12,
+                                    offset: const Offset(5, 5),
+                                  ),
+                                  // Sombra neumórfica clara
+                                  BoxShadow(
+                                    color: shadowLight.withValues(alpha: 0.3),
+                                    blurRadius: 12,
+                                    offset: const Offset(-5, -5),
+                                  ),
+                                ],
+                              ),
+                              child: Center(
+                                child: isProcessando
+                                    ? const SizedBox(
+                                        width: 30,
+                                        height: 30,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2.5,
+                                        ),
+                                      )
+                                    : limiteAtingido
+                                    ? Icon(
+                                        Icons.block_rounded,
+                                        color: Colors.white.withValues(
+                                          alpha: 0.5,
+                                        ),
+                                        size: 38,
+                                      )
+                                    : Icon(
+                                        _gravando
+                                            ? Icons.stop_rounded
+                                            : Icons.mic_rounded,
+                                        color: Colors.white,
+                                        size: 38,
+                                      ),
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
-                      BoxShadow(
-                        color: shadowLight.withValues(alpha: 0.3),
-                        blurRadius: 8,
-                        offset: const Offset(-3, -3),
-                      ),
+
+                      // Espaço espelho do upload para manter mic exatamente no centro
+                      if (!_gravando) const SizedBox(width: 64),
                     ],
                   ),
-                  child: Icon(
-                    Icons.attach_file_rounded,
-                    color: (isProcessando || limiteAtingido)
-                        ? (isDark
-                              ? AppColors.darkTextSecondary
-                              : AppColors.lightTextSecondary)
-                        : AppColors.accent,
-                    size: 22,
-                  ),
-                ),
-              ),
-
-            // Espaçamento entre upload e mic
-            if (!_gravando) const SizedBox(width: 16),
-
-            // Botão neumórfico 3D (gravar)
-            SizedBox(
-              width: 84,
-              height: 84,
-              child: AnimatedBuilder(
-                animation: _pulseCtrl,
-                builder: (context, child) {
-                  final scale = _gravando ? 1.0 + _pulseCtrl.value * 0.1 : 1.0;
-                  return Transform.scale(scale: scale, child: child);
-                },
-                child: GestureDetector(
-                  onTap: (isProcessando || limiteAtingido)
-                      ? null
-                      : _toggleGravar,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: _gravando
-                            ? [
-                                AppColors.error,
-                                AppColors.error.withValues(alpha: 0.7),
-                              ]
-                            : [AppColors.accentLight, AppColors.accent],
-                      ),
-                      boxShadow: [
-                        // Sombra colorida (glow)
-                        BoxShadow(
-                          color:
-                              (_gravando ? AppColors.error : AppColors.accent)
-                                  .withValues(alpha: 0.5),
-                          blurRadius: _gravando ? 30 : 22,
-                          offset: const Offset(0, 6),
-                        ),
-                        // Sombra neumórfica escura
-                        BoxShadow(
-                          color: shadowDark.withValues(alpha: 0.6),
-                          blurRadius: 12,
-                          offset: const Offset(5, 5),
-                        ),
-                        // Sombra neumórfica clara
-                        BoxShadow(
-                          color: shadowLight.withValues(alpha: 0.3),
-                          blurRadius: 12,
-                          offset: const Offset(-5, -5),
-                        ),
-                      ],
-                    ),
-                    child: Center(
-                      child: isProcessando
-                          ? const SizedBox(
-                              width: 30,
-                              height: 30,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2.5,
-                              ),
-                            )
-                          : limiteAtingido
-                          ? Icon(
-                              Icons.block_rounded,
-                              color: Colors.white.withValues(alpha: 0.5),
-                              size: 38,
-                            )
-                          : Icon(
-                              _gravando
-                                  ? Icons.stop_rounded
-                                  : Icons.mic_rounded,
-                              color: Colors.white,
-                              size: 38,
-                            ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-
-            // Espaço espelho do upload para manter mic exatamente no centro
-            if (!_gravando) const SizedBox(width: 64),
-          ],
-        ),
                 ],
               ),
             ),
