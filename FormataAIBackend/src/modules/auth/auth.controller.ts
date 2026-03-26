@@ -9,7 +9,7 @@ import * as usuariosRepository from '../usuarios/usuarios.repository';
 
 const googleClient = new OAuth2Client(env.GOOGLE_CLIENT_ID);
 
-// ─── Rotas ──────────────────────────────────────────────────
+// ─── Rotas! ──────────────────────────────────────────────────
 
 export const rotas: RotaConfig[] = [
   { method: 'POST', path: '/registrar',      handler: 'registrar',      auth: false },

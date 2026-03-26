@@ -3,7 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../services/api_service.dart';
 
+const _webClientId =
+    '561072028296-ishse2t75fvevb99v1g8q353rm84gav8.apps.googleusercontent.com';
+
 final _googleSignIn = GoogleSignIn.instance;
+bool _googleSignInInitialized = false;
+
+Future<void> _ensureGoogleInit() async {
+  if (_googleSignInInitialized) return;
+  await _googleSignIn.initialize(serverClientId: _webClientId);
+  _googleSignInInitialized = true;
+}
 
 /// Dados do usuário logado.
 class UsuarioLogado {
@@ -112,6 +122,7 @@ class AuthStore extends ChangeNotifier {
     _setLoading(true);
     _erro = null;
     try {
+      await _ensureGoogleInit();
       final account = await _googleSignIn.authenticate();
       final idToken = account.authentication.idToken;
       if (idToken == null) throw Exception('Token do Google não obtido');
@@ -119,6 +130,13 @@ class AuthStore extends ChangeNotifier {
       final res = await _api.post('/auth/google', data: {'idToken': idToken});
       await _processarAuth(res.data as Map<String, dynamic>);
       return true;
+    } on GoogleSignInException catch (e) {
+      if (e.code == GoogleSignInExceptionCode.canceled) {
+        _erro = 'Login cancelado';
+      } else {
+        _erro = 'Erro ao conectar com Google';
+      }
+      return false;
     } on DioException catch (e) {
       _erro = _extrairErro(e);
       return false;
@@ -134,7 +152,7 @@ class AuthStore extends ChangeNotifier {
   Future<void> logout() async {
     await _api.deleteToken();
     try {
-      await _googleSignIn.signOut();
+      if (_googleSignInInitialized) await _googleSignIn.signOut();
     } catch (_) {}
     _usuario = null;
     notifyListeners();
