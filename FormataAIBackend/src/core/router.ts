@@ -32,7 +32,7 @@ interface Manifest {
 
 export function criarRouter(): Router {
   const router = Router();
-  const manifestPath = path.join(__dirname, '..', '..', 'manifest.json');
+  const manifestPath = path.join(process.cwd(), 'manifest.json');
 
   if (!fs.existsSync(manifestPath)) {
     logger.erro('ROUTER', 'manifest.json não encontrado! Execute: npm run manifest');
