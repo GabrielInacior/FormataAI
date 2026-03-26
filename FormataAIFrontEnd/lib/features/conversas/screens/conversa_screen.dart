@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/stores/conversas_store.dart';
-import '../../../core/widgets/neu_container.dart';
 import '../../../core/widgets/wave_background.dart';
 import '../widgets/gravar_button.dart';
 import '../widgets/mensagem_bubble.dart';
@@ -153,20 +152,30 @@ class _ConversaScreenState extends State<ConversaScreen> {
             ),
         ],
       ),
-      body: WaveBackground(
-        child: SafeArea(
-          top: true,
-          child: Column(
+      body: Stack(
+        children: [
+          WaveBackground(
+            child: SafeArea(
+              top: true,
+              child: Column(
             children: [
+              // Banner de processamento — visível e amigável
+              if (store.isConversaProcessando(widget.conversaId))
+                _ProcessandoBanner(isDark: isDark),
+
               // Mensagens
               Expanded(
                 child: store.isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : mensagens.isEmpty
-                    ? _VazioMensagens()
+                    ? _VazioMensagens(
+                        processando: store.isConversaProcessando(
+                          widget.conversaId,
+                        ),
+                      )
                     : ListView.builder(
                         controller: _scrollCtrl,
-                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
                         itemCount: mensagens.length,
                         itemBuilder: (_, i) {
                           final msg = mensagens[i];
@@ -181,60 +190,176 @@ class _ConversaScreenState extends State<ConversaScreen> {
                         },
                       ),
               ),
-
-              // Processando indicator
-              if (store.isConversaProcessando(widget.conversaId))
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 8,
-                  ),
-                  child: NeuContainer(
-                    borderRadius: 12,
-                    padding: const EdgeInsets.all(12),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppColors.accent,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          'Processando áudio...',
-                          style: TextStyle(
-                            color: isDark
-                                ? AppColors.darkTextSecondary
-                                : AppColors.lightTextSecondary,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ).animate().fadeIn().slideY(begin: 0.2),
-
-              // Gravar
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: GravarButton(conversaId: widget.conversaId),
-              ),
             ],
           ),
         ),
+      ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: GravarButton(conversaId: widget.conversaId),
+          ),
+        ],
       ),
     );
   }
 }
 
+class _ProcessandoBanner extends StatefulWidget {
+  final bool isDark;
+  const _ProcessandoBanner({required this.isDark});
+
+  @override
+  State<_ProcessandoBanner> createState() => _ProcessandoBannerState();
+}
+
+class _ProcessandoBannerState extends State<_ProcessandoBanner> {
+  int _etapa = 0;
+  late final List<String> _etapas;
+
+  @override
+  void initState() {
+    super.initState();
+    _etapas = [
+      '🎙️ Transcrevendo seu áudio...',
+      '🤖 Formatando o conteúdo...',
+      '✨ Finalizando...',
+    ];
+    _avancarEtapa();
+  }
+
+  void _avancarEtapa() {
+    Future.delayed(const Duration(seconds: 3), () {
+      if (!mounted) return;
+      setState(() => _etapa = (_etapa + 1).clamp(0, _etapas.length - 1));
+      if (_etapa < _etapas.length - 1) _avancarEtapa();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.accent.withValues(alpha: 0.15),
+            AppColors.primary.withValues(alpha: 0.10),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppColors.accent.withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 22,
+            height: 22,
+            child: CircularProgressIndicator(
+              strokeWidth: 2.5,
+              color: AppColors.accent,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 400),
+              transitionBuilder: (child, anim) => FadeTransition(
+                opacity: anim,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 0.3),
+                    end: Offset.zero,
+                  ).animate(anim),
+                  child: child,
+                ),
+              ),
+              child: Text(
+                _etapas[_etapa],
+                key: ValueKey(_etapa),
+                style: TextStyle(
+                  color: widget.isDark
+                      ? AppColors.darkText
+                      : AppColors.lightText,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ).animate().fadeIn(duration: 400.ms).slideY(begin: -0.2);
+  }
+}
+
 class _VazioMensagens extends StatelessWidget {
+  final bool processando;
+  const _VazioMensagens({this.processando = false});
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    if (processando) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.accent.withValues(alpha: 0.2),
+                        AppColors.primary.withValues(alpha: 0.1),
+                      ],
+                    ),
+                  ),
+                  child: const Center(
+                    child: SizedBox(
+                      width: 36,
+                      height: 36,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3,
+                        color: AppColors.accent,
+                      ),
+                    ),
+                  ),
+                )
+                .animate(onPlay: (c) => c.repeat(reverse: true))
+                .scaleXY(begin: 0.92, end: 1.0, duration: 1200.ms),
+            const SizedBox(height: 24),
+            Text(
+              'Processando seu áudio',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: isDark ? AppColors.darkText : AppColors.lightText,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Aguarde alguns segundos...',
+              style: TextStyle(
+                fontSize: 14,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.lightTextSecondary,
+              ),
+            ),
+          ],
+        ).animate().fadeIn(duration: 500.ms),
+      );
+    }
 
     return Center(
       child: Column(

@@ -223,8 +223,8 @@ class ConversasStore extends ChangeNotifier {
       return null;
     }
 
-    // Se não tem conversa, cria uma
-    final cId = conversaId ?? _conversaAtual?.id ?? (await criarConversa())?.id;
+    // Se não tem conversaId explícito, sempre cria uma nova conversa
+    final cId = conversaId ?? (await criarConversa())?.id;
     if (cId == null) return null;
 
     _processando[cId] = true;

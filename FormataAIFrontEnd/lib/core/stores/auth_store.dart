@@ -134,14 +134,14 @@ class AuthStore extends ChangeNotifier {
       if (e.code == GoogleSignInExceptionCode.canceled) {
         _erro = 'Login cancelado';
       } else {
-        _erro = 'Erro ao conectar com Google';
+        _erro = 'Erro Google: ${e.code.name}';
       }
       return false;
     } on DioException catch (e) {
       _erro = _extrairErro(e);
       return false;
     } catch (e) {
-      _erro = 'Erro ao conectar com Google';
+      _erro = 'Erro Google: $e';
       return false;
     } finally {
       _setLoading(false);

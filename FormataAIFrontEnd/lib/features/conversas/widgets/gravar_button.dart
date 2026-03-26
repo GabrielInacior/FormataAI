@@ -141,15 +141,26 @@ class _GravarButtonState extends State<GravarButton>
       if (formato == null || !mounted) return; // Cancelou
 
       final store = context.read<ConversasStore>();
-      final cId = await store.processarAudio(
-        _filePath!,
-        conversaId: widget.conversaId,
-        formato: formato,
-      );
 
-      // Se gravou da home (sem conversaId), navega pra conversa criada
-      if (widget.conversaId == null && cId != null && mounted) {
-        context.push('/conversa/$cId');
+      if (widget.conversaId == null) {
+        // Home: criar conversa, navegar imediatamente, processar em background
+        final novaConversa = await store.criarConversa();
+        if (novaConversa == null || !mounted) return;
+        context.push('/conversa/${novaConversa.id}');
+        unawaited(
+          store.processarAudio(
+            _filePath!,
+            conversaId: novaConversa.id,
+            formato: formato,
+          ),
+        );
+      } else {
+        // Conversa aberta: processar na conversa atual
+        await store.processarAudio(
+          _filePath!,
+          conversaId: widget.conversaId,
+          formato: formato,
+        );
       }
     } catch (e) {
       setState(() => _gravando = false);
@@ -234,14 +245,23 @@ class _GravarButtonState extends State<GravarButton>
     if (formato == null || !mounted) return;
 
     try {
-      final cId = await store.processarAudio(
-        result.files.single.path!,
-        conversaId: widget.conversaId,
-        formato: formato,
-      );
-
-      if (widget.conversaId == null && cId != null && mounted) {
-        context.push('/conversa/$cId');
+      if (widget.conversaId == null) {
+        final novaConversa = await store.criarConversa();
+        if (novaConversa == null || !mounted) return;
+        context.push('/conversa/${novaConversa.id}');
+        unawaited(
+          store.processarAudio(
+            result.files.single.path!,
+            conversaId: novaConversa.id,
+            formato: formato,
+          ),
+        );
+      } else {
+        await store.processarAudio(
+          result.files.single.path!,
+          conversaId: widget.conversaId,
+          formato: formato,
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -273,10 +293,25 @@ class _GravarButtonState extends State<GravarButton>
         ? AppColors.darkShadowLight
         : AppColors.lightShadowLight;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // Timer
+    return SizedBox(
+      width: double.infinity,
+      height: 140,
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.bottomCenter,
+        children: [
+          Positioned.fill(
+            child: CustomPaint(painter: _ButtonWavePainter(isDark: isDark)),
+          ),
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  // Timer
         if (_gravando)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
@@ -311,7 +346,7 @@ class _GravarButtonState extends State<GravarButton>
             ),
           ).animate().fadeIn().slideY(begin: 0.3),
 
-        // Botões: upload + gravar
+        // Botões: upload + gravar (mic sempre exatamente centralizado)
         Row(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -325,7 +360,6 @@ class _GravarButtonState extends State<GravarButton>
                 child: Container(
                   width: 48,
                   height: 48,
-                  margin: const EdgeInsets.only(right: 16),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: isDark
@@ -355,6 +389,9 @@ class _GravarButtonState extends State<GravarButton>
                   ),
                 ),
               ),
+
+            // Espaçamento entre upload e mic
+            if (!_gravando) const SizedBox(width: 16),
 
             // Botão neumórfico 3D (gravar)
             SizedBox(
@@ -434,9 +471,57 @@ class _GravarButtonState extends State<GravarButton>
                 ),
               ),
             ),
+
+            // Espaço espelho do upload para manter mic exatamente no centro
+            if (!_gravando) const SizedBox(width: 64),
           ],
         ),
-      ],
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
+}
+
+class _ButtonWavePainter extends CustomPainter {
+  final bool isDark;
+  _ButtonWavePainter({required this.isDark});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final color = isDark ? AppColors.waveDark : AppColors.waveLight;
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    final path = Path()
+      ..moveTo(0, size.height)
+      ..lineTo(0, size.height * 0.65)
+      ..cubicTo(
+        size.width * 0.25,
+        size.height * 0.45,
+        size.width * 0.40,
+        size.height * 0.45,
+        size.width * 0.5,
+        size.height * 0.45,
+      )
+      ..cubicTo(
+        size.width * 0.60,
+        size.height * 0.45,
+        size.width * 0.75,
+        size.height * 0.45,
+        size.width,
+        size.height * 0.65,
+      )
+      ..lineTo(size.width, size.height)
+      ..close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

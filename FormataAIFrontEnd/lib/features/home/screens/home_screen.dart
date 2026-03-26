@@ -43,9 +43,11 @@ class _HomeScreenState extends State<HomeScreen> {
     final store = context.watch<ConversasStore>();
 
     return Scaffold(
-      body: WaveBackground(
-        child: SafeArea(
-          child: Column(
+      body: Stack(
+        children: [
+          WaveBackground(
+            child: SafeArea(
+              child: Column(
             children: [
               // ─── Header ───────────────────────────────
               Padding(
@@ -172,9 +174,14 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      // ─── FAB Gravar (centralizado) ──────────────
-      floatingActionButton: const GravarButton(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: const GravarButton(),
+          ),
+        ],
+      ),
     );
   }
 }
