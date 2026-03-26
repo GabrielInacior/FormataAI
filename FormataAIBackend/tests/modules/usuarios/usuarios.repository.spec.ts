@@ -107,11 +107,11 @@ describe('usuarios.repository', () => {
     });
   });
 
-  describe('resetarConsultasMensal', () => {
+  describe('resetarConsultasDiario', () => {
     it('deve resetar consultas de todos os usuários', async () => {
       vi.mocked(prisma.usuario.updateMany).mockResolvedValueOnce({ count: 10 } as any);
 
-      const result = await repo.resetarConsultasMensal();
+      const result = await repo.resetarConsultasDiario();
 
       expect(prisma.usuario.updateMany).toHaveBeenCalledWith({
         data: { consultasUsadas: 0 },

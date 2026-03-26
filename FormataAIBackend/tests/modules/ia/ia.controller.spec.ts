@@ -88,7 +88,7 @@ describe('ia.controller', () => {
   describe('rotas', () => {
     it('deve exportar array de rotas', () => {
       expect(iaController.rotas).toBeDefined();
-      expect(iaController.rotas.length).toBe(7);
+      expect(iaController.rotas.length).toBe(8);
     });
 
     it('todas rotas devem ter auth: true', () => {
