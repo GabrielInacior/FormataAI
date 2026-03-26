@@ -2,12 +2,11 @@
 # FormataAI Backend — CI/CD para AWS EC2
 # =====================================================
 # Secrets necessários no GitHub:
-#   EC2_HOST          — IP público da EC2
-#   EC2_USER          — ec2-user
-#   EC2_SSH_KEY       — Conteúdo da chave .pem privada
-#   DOCKER_REGISTRY   — (opcional) se usar ECR
+#   EC2_HOST          — IP público da EC2 (ex: 3.144.149.164)
+#   EC2_USER          — ubuntu
+#   EC2_SSH_KEY       — Conteúdo COMPLETO da chave .pem privada
+#                       (incluindo -----BEGIN e END-----)
 # =====================================================
-
 name: Deploy Backend EC2
 
 on:
@@ -39,37 +38,31 @@ jobs:
 
   deploy:
     name: Deploy EC2
+    needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
 
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Enviar código para EC2
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          source: "FormataAIBackend/"
-          target: "/opt/formataai"
-          strip_components: 1
-          rm: false
-
-      - name: Build e restart na EC2
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd /opt/formataai/FormataAI/FormataAIBackend
+            cd /opt/formataai/FormataAI
 
-            git pull
+            # Pull alterações
+            git pull origin main
+
+            cd FormataAIBackend
 
             # Rebuild e restart containers
             docker-compose down
             docker-compose up -d --build
+
+            # Aguardar container subir
+            sleep 5
 
             # Rodar migrations pendentes
             docker-compose exec -T app npx prisma migrate deploy
