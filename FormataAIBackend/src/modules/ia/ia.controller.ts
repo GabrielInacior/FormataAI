@@ -173,6 +173,10 @@ export async function processar(req: Request, res: Response) {
     });
 
     const resultadoIA = JSON.parse(completion.choices[0].message.content || '{}');
+    // Garante que resposta é sempre string (GPT às vezes retorna array)
+    if (Array.isArray(resultadoIA.resposta)) {
+      resultadoIA.resposta = resultadoIA.resposta.join('\n');
+    }
     const tokensUsados = completion.usage?.total_tokens || 0;
 
     // 3. Criar conversa se não existe
@@ -230,7 +234,31 @@ export async function processar(req: Request, res: Response) {
       modeloUsado: 'gpt-4o-mini',
     });
 
-    // 6. Incrementar contador de consultas
+    // 6. Atualizar título da conversa se ainda é "Nova conversa"
+    try {
+      const conv = await iaRepository.buscarConversaPorId(conversaId);
+      if (conv && (conv.titulo === 'Nova conversa' || !conv.titulo)) {
+        let titulo = resultadoIA.intencao || transcricao.substring(0, 60);
+        try {
+          const tituloResult = await openai.chat.completions.create({
+            model: 'gpt-4o-mini',
+            messages: [
+              {
+                role: 'system',
+                content: 'Gere um título CURTO (máximo 6 palavras) e descritivo para uma conversa baseada neste contexto. Responda APENAS com o título, sem aspas nem pontuação final.',
+              },
+              { role: 'user', content: `Intenção: ${resultadoIA.intencao}\nCategoria: ${resultadoIA.categoria}\nConteúdo: ${transcricao.substring(0, 200)}` },
+            ],
+            max_tokens: 30,
+          });
+          const tituloGerado = tituloResult.choices[0].message.content?.trim();
+          if (tituloGerado && tituloGerado.length > 2) titulo = tituloGerado;
+        } catch { /* fallback para intencao */ }
+        await iaRepository.atualizarConversa(conversaId, { titulo });
+      }
+    } catch { /* não impede o fluxo */ }
+
+    // 7. Incrementar contador de consultas
     await usuariosRepository.incrementarConsultas(usuarioId);
 
     res.json({

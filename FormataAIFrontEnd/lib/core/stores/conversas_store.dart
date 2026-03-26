@@ -162,9 +162,11 @@ class ConversasStore extends ChangeNotifier {
     }
   }
 
-  Future<void> selecionarConversa(String id) async {
-    _isLoading = true;
-    notifyListeners();
+  Future<void> selecionarConversa(String id, {bool silent = false}) async {
+    if (!silent) {
+      _isLoading = true;
+      notifyListeners();
+    }
     try {
       final res = await _api.get('/ia/conversas/$id');
       _conversaAtual = Conversa.fromJson(res.data as Map<String, dynamic>);
@@ -172,7 +174,7 @@ class ConversasStore extends ChangeNotifier {
     } on DioException catch (e) {
       _erro = _extrairErro(e);
     } finally {
-      _isLoading = false;
+      if (!silent) _isLoading = false;
       notifyListeners();
     }
   }
@@ -269,6 +271,8 @@ class ConversasStore extends ChangeNotifier {
       // Atualiza lista de conversas e estatísticas
       await carregarConversas();
       await carregarEstatisticas();
+      // Atualiza a conversa atual (título pode ter mudado)
+      await selecionarConversa(cId, silent: true);
       return cId;
     } on DioException catch (e) {
       if (e.response?.statusCode == 429) {

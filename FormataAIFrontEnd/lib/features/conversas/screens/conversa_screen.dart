@@ -106,7 +106,42 @@ class _ConversaScreenState extends State<ConversaScreen> {
                 color: isDark ? AppColors.darkText : AppColors.lightText,
               ),
               onSelected: (v) async {
-                if (v == 'favoritar') {
+                if (v == 'renomear') {
+                  final ctrl = TextEditingController(
+                    text: conversa.titulo,
+                  );
+                  final novo = await showDialog<String>(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: const Text('Renomear conversa'),
+                      content: TextField(
+                        controller: ctrl,
+                        autofocus: true,
+                        decoration: const InputDecoration(
+                          hintText: 'Novo nome',
+                        ),
+                        onSubmitted: (v) => Navigator.pop(ctx, v),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          child: const Text('Cancelar'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx, ctrl.text),
+                          child: const Text('Salvar'),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (novo != null && novo.trim().isNotEmpty && mounted) {
+                    await store.atualizarConversa(
+                      conversa.id,
+                      {'titulo': novo.trim()},
+                    );
+                    if (mounted) store.selecionarConversa(conversa.id);
+                  }
+                } else if (v == 'favoritar') {
                   await store.atualizarConversa(conversa.id, {
                     'favoritada': !conversa.favoritada,
                   });
@@ -118,6 +153,20 @@ class _ConversaScreenState extends State<ConversaScreen> {
                 }
               },
               itemBuilder: (_) => [
+                PopupMenuItem(
+                  value: 'renomear',
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.edit_outlined,
+                        size: 20,
+                        color: AppColors.primary,
+                      ),
+                      const SizedBox(width: 8),
+                      const Text('Renomear'),
+                    ],
+                  ),
+                ),
                 PopupMenuItem(
                   value: 'favoritar',
                   child: Row(
@@ -159,20 +208,12 @@ class _ConversaScreenState extends State<ConversaScreen> {
               top: true,
               child: Column(
                 children: [
-                  // Banner de processamento — visível e amigável
-                  if (store.isConversaProcessando(widget.conversaId))
-                    _ProcessandoBanner(isDark: isDark),
-
                   // Mensagens
                   Expanded(
-                    child: store.isLoading
-                        ? const Center(child: CircularProgressIndicator())
+                    child: (store.isLoading || (mensagens.isEmpty && store.isConversaProcessando(widget.conversaId)))
+                        ? _VazioMensagens(processando: store.isConversaProcessando(widget.conversaId))
                         : mensagens.isEmpty
-                        ? _VazioMensagens(
-                            processando: store.isConversaProcessando(
-                              widget.conversaId,
-                            ),
-                          )
+                        ? const _VazioMensagens()
                         : ListView.builder(
                             controller: _scrollCtrl,
                             padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
@@ -204,99 +245,6 @@ class _ConversaScreenState extends State<ConversaScreen> {
         ],
       ),
     );
-  }
-}
-
-class _ProcessandoBanner extends StatefulWidget {
-  final bool isDark;
-  const _ProcessandoBanner({required this.isDark});
-
-  @override
-  State<_ProcessandoBanner> createState() => _ProcessandoBannerState();
-}
-
-class _ProcessandoBannerState extends State<_ProcessandoBanner> {
-  int _etapa = 0;
-  late final List<String> _etapas;
-
-  @override
-  void initState() {
-    super.initState();
-    _etapas = [
-      '🎙️ Transcrevendo seu áudio...',
-      '🤖 Formatando o conteúdo...',
-      '✨ Finalizando...',
-    ];
-    _avancarEtapa();
-  }
-
-  void _avancarEtapa() {
-    Future.delayed(const Duration(seconds: 3), () {
-      if (!mounted) return;
-      setState(() => _etapa = (_etapa + 1).clamp(0, _etapas.length - 1));
-      if (_etapa < _etapas.length - 1) _avancarEtapa();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.accent.withValues(alpha: 0.15),
-            AppColors.primary.withValues(alpha: 0.10),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppColors.accent.withValues(alpha: 0.3),
-          width: 1,
-        ),
-      ),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 22,
-            height: 22,
-            child: CircularProgressIndicator(
-              strokeWidth: 2.5,
-              color: AppColors.accent,
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 400),
-              transitionBuilder: (child, anim) => FadeTransition(
-                opacity: anim,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0, 0.3),
-                    end: Offset.zero,
-                  ).animate(anim),
-                  child: child,
-                ),
-              ),
-              child: Text(
-                _etapas[_etapa],
-                key: ValueKey(_etapa),
-                style: TextStyle(
-                  color: widget.isDark
-                      ? AppColors.darkText
-                      : AppColors.lightText,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    ).animate().fadeIn(duration: 400.ms).slideY(begin: -0.2);
   }
 }
 
