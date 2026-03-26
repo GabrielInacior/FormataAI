@@ -82,14 +82,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     // Logo
                     NeuContainer(
                           borderRadius: 32,
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(2),
                           depth: 1.4,
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(20),
                             child: Image.asset(
                               'assets/Icon.png',
-                              width: 64,
-                              height: 64,
+                              width: 130,
+                              height: 130,
                             ),
                           ),
                         )
