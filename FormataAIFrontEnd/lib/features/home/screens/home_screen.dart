@@ -8,7 +8,6 @@ import '../../../core/stores/conversas_store.dart';
 import '../../../core/widgets/neu_container.dart';
 import '../../../core/widgets/wave_background.dart';
 import '../widgets/conversa_tile.dart';
-import '../widgets/stats_card.dart';
 import '../../conversas/widgets/gravar_button.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -80,6 +79,18 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     GestureDetector(
+                      onTap: () => context.push('/arquivadas'),
+                      child: NeuContainer(
+                        borderRadius: 16,
+                        padding: const EdgeInsets.all(10),
+                        child: Icon(
+                          Icons.archive_outlined,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    GestureDetector(
                       onTap: () => context.push('/perfil'),
                       child: NeuContainer(
                         borderRadius: 16,
@@ -93,15 +104,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ).animate().fadeIn(duration: 400.ms),
               ),
-
-              const SizedBox(height: 20),
-
-              // ─── Stats ────────────────────────────────
-              if (store.estatisticas != null)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: StatsCard(stats: store.estatisticas!),
-                ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1),
 
               const SizedBox(height: 20),
 

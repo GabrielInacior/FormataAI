@@ -82,12 +82,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     // Logo
                     NeuContainer(
                           borderRadius: 32,
-                          padding: const EdgeInsets.all(24),
+                          padding: const EdgeInsets.all(16),
                           depth: 1.4,
-                          child: Icon(
-                            Icons.auto_awesome,
-                            size: 52,
-                            color: AppColors.accent,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: Image.asset(
+                              'assets/Icon.png',
+                              width: 64,
+                              height: 64,
+                            ),
                           ),
                         )
                         .animate()

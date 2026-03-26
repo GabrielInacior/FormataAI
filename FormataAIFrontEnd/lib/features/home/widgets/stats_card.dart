@@ -83,6 +83,37 @@ class StatsCard extends StatelessWidget {
                   : AppColors.lightTextSecondary,
             ),
           ),
+          if (stats.consultasRestantes <= 0) ...[
+            const SizedBox(height: 10),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.error.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: AppColors.error.withValues(alpha: 0.3),
+                  width: 0.5,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline, size: 16, color: AppColors.error),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Limite diário atingido. Redefine à meia-noite.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.error,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );

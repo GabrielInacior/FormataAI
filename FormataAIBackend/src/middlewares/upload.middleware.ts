@@ -5,7 +5,7 @@ const storage = multer.memoryStorage();
 export const upload = multer({
   storage,
   limits: {
-    fileSize: 25 * 1024 * 1024, // 25MB (limite do Whisper)
+    fileSize: 25 * 1024 * 1024, // 25MB
   },
   fileFilter: (_req, file, cb) => {
     const allowedMimes = [

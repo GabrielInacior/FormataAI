@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
@@ -47,6 +49,22 @@ class _GravarButtonState extends State<GravarButton>
   }
 
   Future<void> _toggleGravar() async {
+    // Verificar limite antes de iniciar
+    final store = context.read<ConversasStore>();
+    if (!_gravando && store.limiteAtingido) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Limite diário de consultas atingido. Tente novamente amanhã.'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
+      return;
+    }
+
     if (_gravando) {
       await _parar();
     } else {
@@ -96,6 +114,22 @@ class _GravarButtonState extends State<GravarButton>
       if (path == null || !mounted) return;
       _filePath = path;
 
+      // Validar tamanho (15MB)
+      final fileSize = File(_filePath!).lengthSync();
+      if (fileSize > 15 * 1024 * 1024) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Áudio muito grande. O limite é 15MB.'),
+              backgroundColor: AppColors.error,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          );
+        }
+        return;
+      }
+
       // Abre wizard para escolher formato
       final formato = await mostrarFormatoWizard(context);
       if (formato == null || !mounted) return; // Cancelou
@@ -121,6 +155,82 @@ class _GravarButtonState extends State<GravarButton>
     }
   }
 
+  Future<void> _enviarArquivo() async {
+    final store = context.read<ConversasStore>();
+    if (store.limiteAtingido) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Limite diário de consultas atingido.'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
+      return;
+    }
+
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.any,
+    );
+    if (result == null || result.files.single.path == null || !mounted) return;
+
+    // Validar extensão do arquivo
+    final ext = result.files.single.extension?.toLowerCase() ?? '';
+    final allowedExts = ['m4a', 'mp3', 'wav', 'aac', 'ogg', 'webm', 'mp4', 'flac'];
+    if (!allowedExts.contains(ext)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Formato não suportado. Use: ${allowedExts.join(", ")}'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
+      return;
+    }
+
+    // Validar tamanho (15MB)
+    final fileSize = result.files.single.size;
+    if (fileSize > 15 * 1024 * 1024) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Arquivo muito grande. O limite é 15MB.'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
+      return;
+    }
+
+    final formato = await mostrarFormatoWizard(context);
+    if (formato == null || !mounted) return;
+
+    try {
+      final cId = await store.processarAudio(
+        result.files.single.path!,
+        conversaId: widget.conversaId,
+        formato: formato,
+      );
+
+      if (widget.conversaId == null && cId != null && mounted) {
+        context.push('/conversa/$cId');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao processar arquivo: $e')),
+        );
+      }
+    }
+  }
+
   String _formatarTempo(int s) {
     final m = (s ~/ 60).toString().padLeft(2, '0');
     final sec = (s % 60).toString().padLeft(2, '0');
@@ -130,7 +240,11 @@ class _GravarButtonState extends State<GravarButton>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isProcessando = context.watch<ConversasStore>().isProcessando;
+    final store = context.watch<ConversasStore>();
+    final isProcessando = widget.conversaId != null
+        ? store.isConversaProcessando(widget.conversaId!)
+        : store.isProcessando;
+    final limiteAtingido = store.limiteAtingido;
     final shadowDark = isDark
         ? AppColors.darkShadowDark
         : AppColors.lightShadowDark;
@@ -176,7 +290,46 @@ class _GravarButtonState extends State<GravarButton>
             ),
           ).animate().fadeIn().slideY(begin: 0.3),
 
-        // Botão neumórfico 3D
+        // Botões: upload + gravar
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Botão upload de arquivo
+            if (!_gravando)
+              GestureDetector(
+                onTap: (isProcessando || limiteAtingido) ? null : _enviarArquivo,
+                child: Container(
+                  width: 48,
+                  height: 48,
+                  margin: const EdgeInsets.only(right: 16),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+                    boxShadow: [
+                      BoxShadow(
+                        color: shadowDark.withValues(alpha: 0.5),
+                        blurRadius: 8,
+                        offset: const Offset(3, 3),
+                      ),
+                      BoxShadow(
+                        color: shadowLight.withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(-3, -3),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.attach_file_rounded,
+                    color: (isProcessando || limiteAtingido)
+                        ? (isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary)
+                        : AppColors.accent,
+                    size: 22,
+                  ),
+                ),
+              ),
+
+            // Botão neumórfico 3D (gravar)
         SizedBox(
           width: 84,
           height: 84,
@@ -187,7 +340,7 @@ class _GravarButtonState extends State<GravarButton>
               return Transform.scale(scale: scale, child: child);
             },
             child: GestureDetector(
-              onTap: isProcessando ? null : _toggleGravar,
+              onTap: (isProcessando || limiteAtingido) ? null : _toggleGravar,
               child: Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
@@ -233,15 +386,23 @@ class _GravarButtonState extends State<GravarButton>
                             strokeWidth: 2.5,
                           ),
                         )
-                      : Icon(
-                          _gravando ? Icons.stop_rounded : Icons.mic_rounded,
-                          color: Colors.white,
-                          size: 38,
-                        ),
+                      : limiteAtingido
+                          ? Icon(
+                              Icons.block_rounded,
+                              color: Colors.white.withValues(alpha: 0.5),
+                              size: 38,
+                            )
+                          : Icon(
+                              _gravando ? Icons.stop_rounded : Icons.mic_rounded,
+                              color: Colors.white,
+                              size: 38,
+                            ),
                 ),
               ),
             ),
           ),
+        ),
+          ],
         ),
       ],
     );

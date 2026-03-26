@@ -9,7 +9,7 @@ import * as usuariosRepository from '../modules/usuarios/usuarios.repository';
  * - Reset mensal de consultas usadas: dia 1 de cada mês às 00:00.
  */
 export function iniciarCronJobs() {
-  // Todo dia à meia-noite (00:00)
+  // Todo dia à meia-noite (00:00) — reset diário de consultas
   cron.schedule('0 0 * * *', async () => {
     logger.info('CRON', 'Iniciando limpeza de arquivos expirados no S3...');
 
@@ -19,19 +19,15 @@ export function iniciarCronJobs() {
     } catch (error) {
       logger.erro('CRON', 'Erro na limpeza de arquivos do S3', error);
     }
-  });
 
-  // Dia 1 de cada mês à meia-noite (00:00)
-  cron.schedule('0 0 1 * *', async () => {
-    logger.info('CRON', 'Iniciando reset mensal de consultas...');
-
+    logger.info('CRON', 'Iniciando reset diário de consultas...');
     try {
-      const resultado = await usuariosRepository.resetarConsultasMensal();
-      logger.sucesso('CRON', `Reset mensal concluído: ${resultado.count} usuário(s) resetado(s)`);
+      const resultado = await usuariosRepository.resetarConsultasDiario();
+      logger.sucesso('CRON', `Reset diário concluído: ${resultado.count} usuário(s) resetado(s)`);
     } catch (error) {
-      logger.erro('CRON', 'Erro no reset mensal de consultas', error);
+      logger.erro('CRON', 'Erro no reset diário de consultas', error);
     }
   });
 
-  logger.info('CRON', 'Jobs agendados: limpeza S3 (diário), reset consultas (mensal)');
+  logger.info('CRON', 'Jobs agendados: limpeza S3 + reset consultas (diário)');
 }

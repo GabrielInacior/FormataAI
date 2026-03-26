@@ -183,7 +183,7 @@ class _ConversaScreenState extends State<ConversaScreen> {
               ),
 
               // Processando indicator
-              if (store.isProcessando)
+              if (store.isConversaProcessando(widget.conversaId))
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20,

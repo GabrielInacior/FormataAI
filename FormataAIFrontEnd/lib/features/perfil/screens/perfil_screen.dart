@@ -4,19 +4,35 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/stores/auth_store.dart';
+import '../../../core/stores/conversas_store.dart';
 import '../../../core/stores/theme_store.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/widgets/neu_container.dart';
 import '../../../core/widgets/wave_background.dart';
+import '../../home/widgets/stats_card.dart';
 
-class PerfilScreen extends StatelessWidget {
+class PerfilScreen extends StatefulWidget {
   const PerfilScreen({super.key});
+
+  @override
+  State<PerfilScreen> createState() => _PerfilScreenState();
+}
+
+class _PerfilScreenState extends State<PerfilScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ConversasStore>().carregarEstatisticas();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final auth = context.watch<AuthStore>();
     final theme = context.watch<ThemeStore>();
+    final conversasStore = context.watch<ConversasStore>();
     final usuario = auth.usuario;
 
     return Scaffold(
@@ -125,6 +141,15 @@ class PerfilScreen extends StatelessWidget {
                   ).animate().fadeIn(delay: 400.ms),
 
                 const SizedBox(height: 32),
+
+                // ─── Uso / Estatísticas ─────────────────
+                if (conversasStore.estatisticas != null)
+                  StatsCard(stats: conversasStore.estatisticas!)
+                      .animate()
+                      .fadeIn(delay: 450.ms)
+                      .slideY(begin: 0.1),
+
+                const SizedBox(height: 16),
 
                 // ─── Opções ─────────────────────────────
                 _Secao(

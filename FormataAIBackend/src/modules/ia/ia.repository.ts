@@ -100,6 +100,10 @@ export async function criarMensagem(dados: {
   return prisma.mensagem.create({ data: dados });
 }
 
+export async function buscarMensagemPorId(id: string) {
+  return prisma.mensagem.findUnique({ where: { id } });
+}
+
 export async function listarMensagens(
   conversaId: string,
   skip: number,

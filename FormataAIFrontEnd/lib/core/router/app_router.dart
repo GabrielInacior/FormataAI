@@ -5,6 +5,7 @@ import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/registro_screen.dart';
 import '../../features/home/screens/home_screen.dart';
 import '../../features/conversas/screens/conversa_screen.dart';
+import '../../features/conversas/screens/arquivadas_screen.dart';
 import '../../features/perfil/screens/perfil_screen.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -34,5 +35,6 @@ GoRouter criarRouter(AuthStore authStore) => GoRouter(
           ConversaScreen(conversaId: state.pathParameters['id']!),
     ),
     GoRoute(path: '/perfil', builder: (_, _) => const PerfilScreen()),
+    GoRoute(path: '/arquivadas', builder: (_, _) => const ArquivadasScreen()),
   ],
 );

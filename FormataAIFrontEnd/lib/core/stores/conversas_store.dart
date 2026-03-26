@@ -36,6 +36,7 @@ class Mensagem {
   final String tipo; // USUARIO | ASSISTENTE
   final String conteudo;
   final String? transcricao;
+  final String? audioUrl;
   final DateTime criadoEm;
 
   const Mensagem({
@@ -43,6 +44,7 @@ class Mensagem {
     required this.tipo,
     required this.conteudo,
     this.transcricao,
+    this.audioUrl,
     required this.criadoEm,
   });
 
@@ -51,6 +53,7 @@ class Mensagem {
     tipo: json['tipo'] as String,
     conteudo: json['conteudo'] as String? ?? '',
     transcricao: json['transcricao'] as String?,
+    audioUrl: json['audioUrl'] as String?,
     criadoEm: DateTime.parse(json['criadoEm'] as String),
   );
 }
@@ -82,20 +85,31 @@ class ConversasStore extends ChangeNotifier {
   final _api = ApiService.instance;
 
   List<Conversa> _conversas = [];
+  List<Conversa> _arquivadas = [];
   List<Mensagem> _mensagens = [];
   Conversa? _conversaAtual;
   Estatisticas? _estatisticas;
   bool _isLoading = false;
-  bool _isProcessando = false;
+  final Map<String, bool> _processando = {};
   String? _erro;
 
   List<Conversa> get conversas => _conversas;
+  List<Conversa> get arquivadas => _arquivadas;
   List<Mensagem> get mensagens => _mensagens;
   Conversa? get conversaAtual => _conversaAtual;
   Estatisticas? get estatisticas => _estatisticas;
   bool get isLoading => _isLoading;
-  bool get isProcessando => _isProcessando;
+  /// Global — true se qualquer conversa estiver processando.
+  bool get isProcessando => _processando.values.any((v) => v);
   String? get erro => _erro;
+
+  /// Verifica se uma conversa específica está processando.
+  bool isConversaProcessando(String conversaId) =>
+      _processando[conversaId] ?? false;
+
+  /// Retorna true se o limite de consultas foi atingido.
+  bool get limiteAtingido =>
+      _estatisticas != null && _estatisticas!.consultasRestantes <= 0;
 
   void limparErro() {
     _erro = null;
@@ -201,14 +215,21 @@ class ConversasStore extends ChangeNotifier {
     String? conversaId,
     String? formato,
   }) async {
-    _isProcessando = true;
+    // Verifica limite antes de enviar
+    if (limiteAtingido) {
+      _erro = 'Limite diário de consultas atingido. Tente novamente amanhã.';
+      notifyListeners();
+      return null;
+    }
+
+    // Se não tem conversa, cria uma
+    final cId =
+        conversaId ?? _conversaAtual?.id ?? (await criarConversa())?.id;
+    if (cId == null) return null;
+
+    _processando[cId] = true;
     notifyListeners();
     try {
-      // Se não tem conversa, cria uma
-      final cId =
-          conversaId ?? _conversaAtual?.id ?? (await criarConversa())?.id;
-      if (cId == null) return null;
-
       final extraFields = <String, dynamic>{};
       extraFields['conversaId'] = cId;
       if (formato != null) extraFields['formato'] = formato;
@@ -229,6 +250,7 @@ class ConversasStore extends ChangeNotifier {
             tipo: 'USUARIO',
             conteudo: data['transcricao'] as String,
             transcricao: data['transcricao'] as String?,
+            audioUrl: data['audioUrl'] as String?,
             criadoEm: DateTime.now(),
           ),
         );
@@ -244,14 +266,20 @@ class ConversasStore extends ChangeNotifier {
         );
       }
 
-      // Atualiza lista de conversas
+      // Atualiza lista de conversas e estatísticas
       await carregarConversas();
+      await carregarEstatisticas();
       return cId;
     } on DioException catch (e) {
-      _erro = _extrairErro(e);
+      if (e.response?.statusCode == 429) {
+        _erro = 'Limite diário de consultas atingido. Tente novamente amanhã.';
+        await carregarEstatisticas();
+      } else {
+        _erro = _extrairErro(e);
+      }
       return null;
     } finally {
-      _isProcessando = false;
+      _processando.remove(cId);
       notifyListeners();
     }
   }
@@ -264,6 +292,71 @@ class ConversasStore extends ChangeNotifier {
       _estatisticas = Estatisticas.fromJson(res.data as Map<String, dynamic>);
       notifyListeners();
     } catch (_) {}
+  }
+
+  // ─── Reprocessar ──────────────────────────────
+
+  /// Reutiliza uma transcrição existente com um novo formato.
+  /// Cria uma nova conversa e retorna o ID dela.
+  Future<String?> reprocessarAudio(String mensagemId, String formato) async {
+    if (limiteAtingido) {
+      _erro = 'Limite diário de consultas atingido. Tente novamente amanhã.';
+      notifyListeners();
+      return null;
+    }
+
+    _processando['reprocessar_$mensagemId'] = true;
+    notifyListeners();
+    try {
+      final res = await _api.post('/ia/reprocessar', data: {
+        'mensagemId': mensagemId,
+        'formato': formato,
+      });
+      final data = res.data as Map<String, dynamic>;
+      final cId = data['conversaId'] as String?;
+
+      await carregarConversas();
+      await carregarEstatisticas();
+      return cId;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 429) {
+        _erro = 'Limite diário de consultas atingido. Tente novamente amanhã.';
+        await carregarEstatisticas();
+      } else {
+        _erro = _extrairErro(e);
+      }
+      return null;
+    } finally {
+      _processando.remove('reprocessar_$mensagemId');
+      notifyListeners();
+    }
+  }
+
+  // ─── Arquivadas ────────────────────────────────
+
+  Future<void> carregarArquivadas({String? busca}) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final params = <String, dynamic>{
+        'pagina': 1,
+        'limite': 50,
+        'arquivada': 'true',
+      };
+      if (busca != null && busca.isNotEmpty) params['busca'] = busca;
+
+      final res = await _api.get('/ia/conversas', queryParameters: params);
+      final data = res.data as Map<String, dynamic>;
+      final itens =
+          (data['dados'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+
+      _arquivadas = itens.map(Conversa.fromJson).toList();
+    } on DioException catch (e) {
+      _erro = _extrairErro(e);
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   // ─── Internos ─────────────────────────────────

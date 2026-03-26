@@ -28,7 +28,7 @@ export async function incrementarConsultas(id: string) {
   });
 }
 
-export async function resetarConsultasMensal() {
+export async function resetarConsultasDiario() {
   return prisma.usuario.updateMany({
     data: { consultasUsadas: 0 },
   });

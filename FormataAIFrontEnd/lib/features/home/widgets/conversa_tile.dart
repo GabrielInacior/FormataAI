@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/stores/conversas_store.dart';
 import '../../../core/widgets/neu_container.dart';
@@ -7,12 +8,16 @@ class ConversaTile extends StatelessWidget {
   final Conversa conversa;
   final VoidCallback onTap;
   final VoidCallback onDelete;
+  final IconData? deleteIcon;
+  final String? deleteTooltip;
 
   const ConversaTile({
     super.key,
     required this.conversa,
     required this.onTap,
     required this.onDelete,
+    this.deleteIcon,
+    this.deleteTooltip,
   });
 
   IconData _iconePorCategoria(String cat) {
@@ -41,6 +46,8 @@ class ConversaTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isProcessando =
+        context.watch<ConversasStore>().isConversaProcessando(conversa.id);
 
     return GestureDetector(
       onTap: onTap,
@@ -82,11 +89,20 @@ class ConversaTile extends StatelessWidget {
                   ),
                 ],
               ),
-              child: Icon(
-                _iconePorCategoria(conversa.categoria),
-                color: AppColors.accent,
-                size: 22,
-              ),
+              child: isProcessando
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.accent,
+                      ),
+                    )
+                  : Icon(
+                      _iconePorCategoria(conversa.categoria),
+                      color: AppColors.accent,
+                      size: 22,
+                    ),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -149,9 +165,9 @@ class ConversaTile extends StatelessWidget {
                 ),
               ),
             GestureDetector(
-              onTap: () => _confirmarDelete(context),
+              onTap: deleteIcon != null ? onDelete : () => _confirmarDelete(context),
               child: Icon(
-                Icons.delete_outline,
+                deleteIcon ?? Icons.delete_outline,
                 size: 20,
                 color: isDark
                     ? AppColors.darkTextSecondary
