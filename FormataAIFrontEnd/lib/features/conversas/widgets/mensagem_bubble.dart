@@ -212,7 +212,8 @@ class _MensagemBubbleState extends State<MensagemBubble> {
 
   /// Card de áudio para mensagens do usuário.
   Widget _buildAudioCard(BuildContext context, bool isDark) {
-    final hasAudioUrl = mensagem.audioUrl != null && mensagem.audioUrl!.isNotEmpty;
+    final hasAudioUrl =
+        mensagem.audioUrl != null && mensagem.audioUrl!.isNotEmpty;
     final store = context.watch<ConversasStore>();
     final isReprocessando = store.isProcessando;
 
@@ -283,8 +284,8 @@ class _MensagemBubbleState extends State<MensagemBubble> {
                         child: Icon(
                           hasAudioUrl
                               ? (_audioDisponivel == false
-                                  ? Icons.cloud_off_rounded
-                                  : Icons.graphic_eq_rounded)
+                                    ? Icons.cloud_off_rounded
+                                    : Icons.graphic_eq_rounded)
                               : Icons.text_snippet_rounded,
                           color: Colors.white,
                           size: 20,
@@ -298,8 +299,8 @@ class _MensagemBubbleState extends State<MensagemBubble> {
                           Text(
                             hasAudioUrl
                                 ? (_audioDisponivel == false
-                                    ? 'Áudio indisponível'
-                                    : 'Áudio enviado')
+                                      ? 'Áudio indisponível'
+                                      : 'Áudio enviado')
                                 : 'Texto reutilizado',
                             style: const TextStyle(
                               color: Colors.white,
@@ -357,15 +358,23 @@ class _MensagemBubbleState extends State<MensagemBubble> {
                             overlayRadius: 10,
                           ),
                           activeTrackColor: Colors.white,
-                          inactiveTrackColor: Colors.white.withValues(alpha: 0.3),
+                          inactiveTrackColor: Colors.white.withValues(
+                            alpha: 0.3,
+                          ),
                           thumbColor: Colors.white,
                         ),
                         child: Slider(
                           min: 0,
-                          max: _duration.inMilliseconds.toDouble().clamp(1, double.infinity),
+                          max: _duration.inMilliseconds.toDouble().clamp(
+                            1,
+                            double.infinity,
+                          ),
                           value: _position.inMilliseconds.toDouble().clamp(
                             0,
-                            _duration.inMilliseconds.toDouble().clamp(1, double.infinity),
+                            _duration.inMilliseconds.toDouble().clamp(
+                              1,
+                              double.infinity,
+                            ),
                           ),
                           onChanged: (v) {
                             _player?.seek(Duration(milliseconds: v.toInt()));
@@ -497,9 +506,7 @@ class _MensagemBubbleState extends State<MensagemBubble> {
                 _AcaoBtn(
                   icon: Icons.picture_as_pdf_rounded,
                   label: 'PDF',
-                  onTap: () => exportarParaPdf(
-                    conteudo: mensagem.conteudo,
-                  ),
+                  onTap: () => exportarParaPdf(conteudo: mensagem.conteudo),
                 ),
               ],
             ),

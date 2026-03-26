@@ -96,59 +96,58 @@ class _ArquivadasScreenState extends State<ArquivadasScreen> {
                 child: store.isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : store.arquivadas.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.archive_outlined,
-                                  size: 60,
-                                  color: AppColors.accent.withValues(alpha: 0.5),
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  'Nenhuma conversa arquivada',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: isDark
-                                        ? AppColors.darkText
-                                        : AppColors.lightText,
-                                  ),
-                                ),
-                              ],
-                            ).animate().fadeIn(duration: 400.ms),
-                          )
-                        : RefreshIndicator(
-                            onRefresh: () => store.carregarArquivadas(),
-                            color: AppColors.accent,
-                            child: ListView.separated(
-                              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                              itemCount: store.arquivadas.length,
-                              separatorBuilder: (_, __) =>
-                                  const SizedBox(height: 12),
-                              itemBuilder: (_, i) {
-                                final conversa = store.arquivadas[i];
-                                return ConversaTile(
-                                  conversa: conversa,
-                                  onTap: () =>
-                                      context.push('/conversa/${conversa.id}'),
-                                  onDelete: () async {
-                                    await store.atualizarConversa(
-                                      conversa.id,
-                                      {'arquivada': false},
-                                    );
-                                    store.carregarArquivadas();
-                                  },
-                                  deleteIcon: Icons.unarchive_rounded,
-                                  deleteTooltip: 'Desarquivar',
-                                ).animate().fadeIn(
-                                  delay: Duration(milliseconds: 50 * i),
-                                  duration: 300.ms,
-                                );
-                              },
+                    ? Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.archive_outlined,
+                              size: 60,
+                              color: AppColors.accent.withValues(alpha: 0.5),
                             ),
-                          ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Nenhuma conversa arquivada',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: isDark
+                                    ? AppColors.darkText
+                                    : AppColors.lightText,
+                              ),
+                            ),
+                          ],
+                        ).animate().fadeIn(duration: 400.ms),
+                      )
+                    : RefreshIndicator(
+                        onRefresh: () => store.carregarArquivadas(),
+                        color: AppColors.accent,
+                        child: ListView.separated(
+                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                          itemCount: store.arquivadas.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 12),
+                          itemBuilder: (_, i) {
+                            final conversa = store.arquivadas[i];
+                            return ConversaTile(
+                              conversa: conversa,
+                              onTap: () =>
+                                  context.push('/conversa/${conversa.id}'),
+                              onDelete: () async {
+                                await store.atualizarConversa(conversa.id, {
+                                  'arquivada': false,
+                                });
+                                store.carregarArquivadas();
+                              },
+                              deleteIcon: Icons.unarchive_rounded,
+                              deleteTooltip: 'Desarquivar',
+                            ).animate().fadeIn(
+                              delay: Duration(milliseconds: 50 * i),
+                              duration: 300.ms,
+                            );
+                          },
+                        ),
+                      ),
               ),
             ],
           ),

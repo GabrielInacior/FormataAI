@@ -55,10 +55,14 @@ class _GravarButtonState extends State<GravarButton>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Limite diário de consultas atingido. Tente novamente amanhã.'),
+            content: const Text(
+              'Limite diário de consultas atingido. Tente novamente amanhã.',
+            ),
             backgroundColor: AppColors.error,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         );
       }
@@ -123,7 +127,9 @@ class _GravarButtonState extends State<GravarButton>
               content: const Text('Áudio muito grande. O limite é 15MB.'),
               backgroundColor: AppColors.error,
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           );
         }
@@ -164,29 +170,42 @@ class _GravarButtonState extends State<GravarButton>
             content: const Text('Limite diário de consultas atingido.'),
             backgroundColor: AppColors.error,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         );
       }
       return;
     }
 
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.any,
-    );
+    final result = await FilePicker.platform.pickFiles(type: FileType.any);
     if (result == null || result.files.single.path == null || !mounted) return;
 
     // Validar extensão do arquivo
     final ext = result.files.single.extension?.toLowerCase() ?? '';
-    final allowedExts = ['m4a', 'mp3', 'wav', 'aac', 'ogg', 'webm', 'mp4', 'flac'];
+    final allowedExts = [
+      'm4a',
+      'mp3',
+      'wav',
+      'aac',
+      'ogg',
+      'webm',
+      'mp4',
+      'flac',
+    ];
     if (!allowedExts.contains(ext)) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Formato não suportado. Use: ${allowedExts.join(", ")}'),
+            content: Text(
+              'Formato não suportado. Use: ${allowedExts.join(", ")}',
+            ),
             backgroundColor: AppColors.error,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         );
       }
@@ -202,7 +221,9 @@ class _GravarButtonState extends State<GravarButton>
             content: const Text('Arquivo muito grande. O limite é 15MB.'),
             backgroundColor: AppColors.error,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         );
       }
@@ -298,14 +319,18 @@ class _GravarButtonState extends State<GravarButton>
             // Botão upload de arquivo
             if (!_gravando)
               GestureDetector(
-                onTap: (isProcessando || limiteAtingido) ? null : _enviarArquivo,
+                onTap: (isProcessando || limiteAtingido)
+                    ? null
+                    : _enviarArquivo,
                 child: Container(
                   width: 48,
                   height: 48,
                   margin: const EdgeInsets.only(right: 16),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+                    color: isDark
+                        ? AppColors.darkSurface
+                        : AppColors.lightSurface,
                     boxShadow: [
                       BoxShadow(
                         color: shadowDark.withValues(alpha: 0.5),
@@ -322,7 +347,9 @@ class _GravarButtonState extends State<GravarButton>
                   child: Icon(
                     Icons.attach_file_rounded,
                     color: (isProcessando || limiteAtingido)
-                        ? (isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary)
+                        ? (isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.lightTextSecondary)
                         : AppColors.accent,
                     size: 22,
                   ),
@@ -330,78 +357,83 @@ class _GravarButtonState extends State<GravarButton>
               ),
 
             // Botão neumórfico 3D (gravar)
-        SizedBox(
-          width: 84,
-          height: 84,
-          child: AnimatedBuilder(
-            animation: _pulseCtrl,
-            builder: (context, child) {
-              final scale = _gravando ? 1.0 + _pulseCtrl.value * 0.1 : 1.0;
-              return Transform.scale(scale: scale, child: child);
-            },
-            child: GestureDetector(
-              onTap: (isProcessando || limiteAtingido) ? null : _toggleGravar,
-              child: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: _gravando
-                        ? [
-                            AppColors.error,
-                            AppColors.error.withValues(alpha: 0.7),
-                          ]
-                        : [AppColors.accentLight, AppColors.accent],
-                  ),
-                  boxShadow: [
-                    // Sombra colorida (glow)
-                    BoxShadow(
-                      color: (_gravando ? AppColors.error : AppColors.accent)
-                          .withValues(alpha: 0.5),
-                      blurRadius: _gravando ? 30 : 22,
-                      offset: const Offset(0, 6),
+            SizedBox(
+              width: 84,
+              height: 84,
+              child: AnimatedBuilder(
+                animation: _pulseCtrl,
+                builder: (context, child) {
+                  final scale = _gravando ? 1.0 + _pulseCtrl.value * 0.1 : 1.0;
+                  return Transform.scale(scale: scale, child: child);
+                },
+                child: GestureDetector(
+                  onTap: (isProcessando || limiteAtingido)
+                      ? null
+                      : _toggleGravar,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: _gravando
+                            ? [
+                                AppColors.error,
+                                AppColors.error.withValues(alpha: 0.7),
+                              ]
+                            : [AppColors.accentLight, AppColors.accent],
+                      ),
+                      boxShadow: [
+                        // Sombra colorida (glow)
+                        BoxShadow(
+                          color:
+                              (_gravando ? AppColors.error : AppColors.accent)
+                                  .withValues(alpha: 0.5),
+                          blurRadius: _gravando ? 30 : 22,
+                          offset: const Offset(0, 6),
+                        ),
+                        // Sombra neumórfica escura
+                        BoxShadow(
+                          color: shadowDark.withValues(alpha: 0.6),
+                          blurRadius: 12,
+                          offset: const Offset(5, 5),
+                        ),
+                        // Sombra neumórfica clara
+                        BoxShadow(
+                          color: shadowLight.withValues(alpha: 0.3),
+                          blurRadius: 12,
+                          offset: const Offset(-5, -5),
+                        ),
+                      ],
                     ),
-                    // Sombra neumórfica escura
-                    BoxShadow(
-                      color: shadowDark.withValues(alpha: 0.6),
-                      blurRadius: 12,
-                      offset: const Offset(5, 5),
-                    ),
-                    // Sombra neumórfica clara
-                    BoxShadow(
-                      color: shadowLight.withValues(alpha: 0.3),
-                      blurRadius: 12,
-                      offset: const Offset(-5, -5),
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: isProcessando
-                      ? const SizedBox(
-                          width: 30,
-                          height: 30,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2.5,
-                          ),
-                        )
-                      : limiteAtingido
+                    child: Center(
+                      child: isProcessando
+                          ? const SizedBox(
+                              width: 30,
+                              height: 30,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2.5,
+                              ),
+                            )
+                          : limiteAtingido
                           ? Icon(
                               Icons.block_rounded,
                               color: Colors.white.withValues(alpha: 0.5),
                               size: 38,
                             )
                           : Icon(
-                              _gravando ? Icons.stop_rounded : Icons.mic_rounded,
+                              _gravando
+                                  ? Icons.stop_rounded
+                                  : Icons.mic_rounded,
                               color: Colors.white,
                               size: 38,
                             ),
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-        ),
           ],
         ),
       ],

@@ -144,10 +144,9 @@ class _PerfilScreenState extends State<PerfilScreen> {
 
                 // ─── Uso / Estatísticas ─────────────────
                 if (conversasStore.estatisticas != null)
-                  StatsCard(stats: conversasStore.estatisticas!)
-                      .animate()
-                      .fadeIn(delay: 450.ms)
-                      .slideY(begin: 0.1),
+                  StatsCard(
+                    stats: conversasStore.estatisticas!,
+                  ).animate().fadeIn(delay: 450.ms).slideY(begin: 0.1),
 
                 const SizedBox(height: 16),
 

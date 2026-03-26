@@ -99,6 +99,7 @@ class ConversasStore extends ChangeNotifier {
   Conversa? get conversaAtual => _conversaAtual;
   Estatisticas? get estatisticas => _estatisticas;
   bool get isLoading => _isLoading;
+
   /// Global — true se qualquer conversa estiver processando.
   bool get isProcessando => _processando.values.any((v) => v);
   String? get erro => _erro;
@@ -223,8 +224,7 @@ class ConversasStore extends ChangeNotifier {
     }
 
     // Se não tem conversa, cria uma
-    final cId =
-        conversaId ?? _conversaAtual?.id ?? (await criarConversa())?.id;
+    final cId = conversaId ?? _conversaAtual?.id ?? (await criarConversa())?.id;
     if (cId == null) return null;
 
     _processando[cId] = true;
@@ -308,10 +308,10 @@ class ConversasStore extends ChangeNotifier {
     _processando['reprocessar_$mensagemId'] = true;
     notifyListeners();
     try {
-      final res = await _api.post('/ia/reprocessar', data: {
-        'mensagemId': mensagemId,
-        'formato': formato,
-      });
+      final res = await _api.post(
+        '/ia/reprocessar',
+        data: {'mensagemId': mensagemId, 'formato': formato},
+      );
       final data = res.data as Map<String, dynamic>;
       final cId = data['conversaId'] as String?;
 

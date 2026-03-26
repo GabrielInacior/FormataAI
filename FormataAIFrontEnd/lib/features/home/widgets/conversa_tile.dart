@@ -46,8 +46,9 @@ class ConversaTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isProcessando =
-        context.watch<ConversasStore>().isConversaProcessando(conversa.id);
+    final isProcessando = context.watch<ConversasStore>().isConversaProcessando(
+      conversa.id,
+    );
 
     return GestureDetector(
       onTap: onTap,
@@ -165,7 +166,9 @@ class ConversaTile extends StatelessWidget {
                 ),
               ),
             GestureDetector(
-              onTap: deleteIcon != null ? onDelete : () => _confirmarDelete(context),
+              onTap: deleteIcon != null
+                  ? onDelete
+                  : () => _confirmarDelete(context),
               child: Icon(
                 deleteIcon ?? Icons.delete_outline,
                 size: 20,

@@ -21,10 +21,7 @@ Future<void> exportarParaPdf({
         children: [
           pw.Text(
             titulo,
-            style: pw.TextStyle(
-              fontSize: 18,
-              fontWeight: pw.FontWeight.bold,
-            ),
+            style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
           ),
           pw.SizedBox(height: 4),
           pw.Divider(thickness: 0.5),
@@ -55,11 +52,11 @@ Future<void> exportarParaPdf({
 
   final bytes = await doc.save();
   final dir = await getTemporaryDirectory();
-  final fileName = titulo.replaceAll(RegExp(r'[^\w\s-]'), '').replaceAll(' ', '_');
+  final fileName = titulo
+      .replaceAll(RegExp(r'[^\w\s-]'), '')
+      .replaceAll(' ', '_');
   final file = File('${dir.path}/$fileName.pdf');
   await file.writeAsBytes(bytes);
 
-  await SharePlus.instance.share(
-    ShareParams(files: [XFile(file.path)]),
-  );
+  await SharePlus.instance.share(ShareParams(files: [XFile(file.path)]));
 }
