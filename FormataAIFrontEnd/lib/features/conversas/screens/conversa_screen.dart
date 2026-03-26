@@ -107,9 +107,7 @@ class _ConversaScreenState extends State<ConversaScreen> {
               ),
               onSelected: (v) async {
                 if (v == 'renomear') {
-                  final ctrl = TextEditingController(
-                    text: conversa.titulo,
-                  );
+                  final ctrl = TextEditingController(text: conversa.titulo);
                   final novo = await showDialog<String>(
                     context: context,
                     builder: (ctx) => AlertDialog(
@@ -135,10 +133,9 @@ class _ConversaScreenState extends State<ConversaScreen> {
                     ),
                   );
                   if (novo != null && novo.trim().isNotEmpty && mounted) {
-                    await store.atualizarConversa(
-                      conversa.id,
-                      {'titulo': novo.trim()},
-                    );
+                    await store.atualizarConversa(conversa.id, {
+                      'titulo': novo.trim(),
+                    });
                     if (mounted) store.selecionarConversa(conversa.id);
                   }
                 } else if (v == 'favoritar') {
@@ -210,8 +207,15 @@ class _ConversaScreenState extends State<ConversaScreen> {
                 children: [
                   // Mensagens
                   Expanded(
-                    child: (store.isLoading || (mensagens.isEmpty && store.isConversaProcessando(widget.conversaId)))
-                        ? _VazioMensagens(processando: store.isConversaProcessando(widget.conversaId))
+                    child:
+                        (store.isLoading ||
+                            (mensagens.isEmpty &&
+                                store.isConversaProcessando(widget.conversaId)))
+                        ? _VazioMensagens(
+                            processando: store.isConversaProcessando(
+                              widget.conversaId,
+                            ),
+                          )
                         : mensagens.isEmpty
                         ? const _VazioMensagens()
                         : ListView.builder(
