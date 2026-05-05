@@ -124,7 +124,11 @@ class ConversasStore extends ChangeNotifier {
 
   // ─── Conversas ────────────────────────────────
 
-  Future<void> carregarConversas({int pagina = 1, String? busca, bool silent = false}) async {
+  Future<void> carregarConversas({
+    int pagina = 1,
+    String? busca,
+    bool silent = false,
+  }) async {
     if (!silent) {
       _isLoading = true;
       notifyListeners();

@@ -28,7 +28,9 @@ class _ConversaScreenState extends State<ConversaScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await context.read<ConversasStore>().selecionarConversa(widget.conversaId);
+      await context.read<ConversasStore>().selecionarConversa(
+        widget.conversaId,
+      );
       if (mounted) setState(() => _initialLoading = false);
     });
   }
@@ -73,7 +75,8 @@ class _ConversaScreenState extends State<ConversaScreen> {
     final conversa = store.conversaAtual;
     final mensagens = store.mensagens;
 
-    final showTyping = store.isConversaProcessando(widget.conversaId) ||
+    final showTyping =
+        store.isConversaProcessando(widget.conversaId) ||
         store.isAguardandoResposta(widget.conversaId);
     final totalItems = mensagens.length + (showTyping ? 1 : 0);
 
@@ -214,11 +217,10 @@ class _ConversaScreenState extends State<ConversaScreen> {
                 children: [
                   // Mensagens
                   Expanded(
-                    child:
-                        (_initialLoading || store.isLoading)
+                    child: (_initialLoading || store.isLoading)
                         ? const _VazioMensagens(processando: true)
                         : (mensagens.isEmpty &&
-                            store.isConversaProcessando(widget.conversaId))
+                              store.isConversaProcessando(widget.conversaId))
                         ? const _VazioMensagens(processando: true)
                         : mensagens.isEmpty
                         ? const _VazioMensagens()
@@ -366,18 +368,20 @@ class _TypingIndicator extends StatelessWidget {
               borderRadius: BorderRadius.circular(11),
               boxShadow: [
                 BoxShadow(
-                  color: (isDark
-                          ? AppColors.darkShadowDark
-                          : AppColors.lightShadowDark)
-                      .withValues(alpha: isDark ? 0.5 : 0.8),
+                  color:
+                      (isDark
+                              ? AppColors.darkShadowDark
+                              : AppColors.lightShadowDark)
+                          .withValues(alpha: isDark ? 0.5 : 0.8),
                   offset: const Offset(2, 2),
                   blurRadius: 5,
                 ),
                 BoxShadow(
-                  color: (isDark
-                          ? AppColors.darkShadowLight
-                          : AppColors.lightShadowLight)
-                      .withValues(alpha: isDark ? 0.2 : 0.8),
+                  color:
+                      (isDark
+                              ? AppColors.darkShadowLight
+                              : AppColors.lightShadowLight)
+                          .withValues(alpha: isDark ? 0.2 : 0.8),
                   offset: const Offset(-2, -2),
                   blurRadius: 5,
                 ),
@@ -429,21 +433,19 @@ class _AnimatedDots extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final color =
-        isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+    final color = isDark
+        ? AppColors.darkTextSecondary
+        : AppColors.lightTextSecondary;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: List.generate(3, (i) {
         return Container(
-          margin: EdgeInsets.only(right: i < 2 ? 6 : 0),
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
-        )
+              margin: EdgeInsets.only(right: i < 2 ? 6 : 0),
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+            )
             .animate(onPlay: (c) => c.repeat(reverse: true))
             .scaleXY(
               begin: 0.5,

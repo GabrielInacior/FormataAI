@@ -293,9 +293,11 @@ class _GravarButtonState extends State<GravarButton>
         ? AppColors.darkShadowLight
         : AppColors.lightShadowLight;
 
-    return SizedBox(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOut,
       width: double.infinity,
-      height: 140,
+      height: _gravando ? 210 : 140,
       child: Stack(
         clipBehavior: Clip.none,
         alignment: Alignment.bottomCenter,
