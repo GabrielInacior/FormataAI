@@ -41,6 +41,9 @@ class ShareIntentService {
 
   /// Inicializa a escuta de intents. Deve ser chamado uma vez após login.
   void iniciar() {
+    // Plugin só funciona em Android/iOS em produção; silencia erros no emulador/desktop.
+    if (!Platform.isAndroid && !Platform.isIOS) return;
+
     // Arquivo compartilhado enquanto o app já estava aberto
     _sub = ReceiveSharingIntent.instance.getMediaStream().listen(
       (files) => _processar(files),
@@ -48,9 +51,15 @@ class ShareIntentService {
     );
 
     // Arquivo que abriu o app
-    ReceiveSharingIntent.instance.getInitialMedia().then((files) {
-      if (files.isNotEmpty) _processar(files);
-    });
+    ReceiveSharingIntent.instance
+        .getInitialMedia()
+        .then((files) {
+          if (files.isNotEmpty) _processar(files);
+        })
+        .catchError((e) {
+          // MissingPluginException em emuladores sem suporte ao plugin
+          debugPrint('[ShareIntent] getInitialMedia indisponível: $e');
+        });
   }
 
   void parar() {
