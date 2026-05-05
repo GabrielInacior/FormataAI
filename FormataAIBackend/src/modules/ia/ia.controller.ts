@@ -107,7 +107,7 @@ export async function processar(req: Request, res: Response) {
     const formatosDisponiveis: Record<string, string> = {
       WHATSAPP: 'mensagem para WhatsApp — tom informal/amigável, direta, com emojis quando adequado',
       EMAIL: 'email formal/profissional — com saudação, corpo e despedida',
-      DOCUMENTO: 'documento formal — estruturado com parágrafos, linguagem formal',
+      DOCUMENTO: 'documento formal estruturado em seções e parágrafos com linguagem técnica/formal — NÃO use saudações (ex: Prezados), despedidas (ex: Atenciosamente) nem estrutura de email; organize o conteúdo com título, introdução, desenvolvimento e conclusão como um relatório ou artigo',
       ORCAMENTO: 'orçamento — com itens, valores, condições e total',
       RECEITA: 'receita médica ou culinária — formato estruturado com ingredientes/itens e instruções',
       RESUMO: 'resumo — síntese objetiva e concisa do conteúdo ditado',
@@ -329,7 +329,7 @@ export async function reprocessar(req: Request, res: Response) {
     const formatosDisponiveis: Record<string, string> = {
       WHATSAPP: 'mensagem para WhatsApp — tom informal/amigável, direta, com emojis quando adequado',
       EMAIL: 'email formal/profissional — com saudação, corpo e despedida',
-      DOCUMENTO: 'documento formal — estruturado com parágrafos, linguagem formal',
+      DOCUMENTO: 'documento formal estruturado em seções e parágrafos com linguagem técnica/formal — NÃO use saudações (ex: Prezados), despedidas (ex: Atenciosamente) nem estrutura de email; organize o conteúdo com título, introdução, desenvolvimento e conclusão como um relatório ou artigo',
       ORCAMENTO: 'orçamento — com itens, valores, condições e total',
       RECEITA: 'receita médica ou culinária — formato estruturado com ingredientes/itens e instruções',
       RESUMO: 'resumo — síntese objetiva e concisa do conteúdo ditado',

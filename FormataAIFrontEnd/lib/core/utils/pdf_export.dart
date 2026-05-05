@@ -58,28 +58,25 @@ Future<File> _gerarArquivoPdfAbnt({
       ),
       build: (ctx) => pw.Column(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: pw.CrossAxisAlignment.center,
+        crossAxisAlignment: pw.CrossAxisAlignment.stretch,
         children: [
-          // Instituição (topo)
+          // Instituição (topo centralizado)
           pw.Text(
             'FormataAI',
             style: pw.TextStyle(font: fontBold, fontSize: 14),
             textAlign: pw.TextAlign.center,
           ),
 
-          // Título (centro)
-          pw.Column(
-            children: [
-              pw.Text(
-                titulo.toUpperCase(),
-                style: pw.TextStyle(font: fontBold, fontSize: 14),
-                textAlign: pw.TextAlign.center,
-              ),
-            ],
+          // Título (centro da página)
+          pw.Text(
+            titulo.toUpperCase(),
+            style: pw.TextStyle(font: fontBold, fontSize: 14),
+            textAlign: pw.TextAlign.center,
           ),
 
           // Local e data (rodapé da capa)
           pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.stretch,
             children: [
               pw.Text(
                 'Brasil',
@@ -128,27 +125,39 @@ Future<File> _gerarArquivoPdfAbnt({
       build: (ctx) {
         final widgets = <pw.Widget>[];
 
+        // Título do documento no topo do corpo (ABNT: centralizado, negrito, maiúsculo)
+        widgets.add(
+          pw.Center(
+            child: pw.Text(
+              titulo.toUpperCase(),
+              style: pw.TextStyle(font: fontBold, fontSize: fontSize),
+              textAlign: pw.TextAlign.center,
+            ),
+          ),
+        );
+        widgets.add(pw.SizedBox(height: 24));
+
         for (final linha in linhas) {
           final trimmed = linha.trim();
           if (trimmed.isEmpty) {
-            widgets.add(pw.SizedBox(height: fontSize * lineSpacing));
+            widgets.add(pw.SizedBox(height: fontSize * (lineSpacing - 1)));
             continue;
           }
 
-          // Detecta título de seção (linha curta, sem ponto no final, tudo maiúsculo ou começa com número)
           final isSecao = _isTituloSecao(trimmed);
 
           if (isSecao) {
-            widgets.add(pw.SizedBox(height: 12));
+            widgets.add(pw.SizedBox(height: 16));
             widgets.add(
               pw.Text(
                 trimmed.toUpperCase(),
                 style: pw.TextStyle(font: fontBold, fontSize: fontSize),
+                textAlign: pw.TextAlign.left,
               ),
             );
-            widgets.add(pw.SizedBox(height: 6));
+            widgets.add(pw.SizedBox(height: 8));
           } else {
-            // Parágrafo normal: recuo de 1,25cm na primeira linha
+            // Parágrafo normal ABNT: recuo 1,25cm, justificado, espaçamento 1,5
             widgets.add(
               pw.Padding(
                 padding: const pw.EdgeInsets.only(
@@ -156,13 +165,17 @@ Future<File> _gerarArquivoPdfAbnt({
                 ),
                 child: pw.Text(
                   trimmed,
-                  style: pw.TextStyle(font: fontNormal, fontSize: fontSize),
+                  style: pw.TextStyle(
+                    font: fontNormal,
+                    fontSize: fontSize,
+                    lineSpacing: (fontSize * lineSpacing) - fontSize,
+                  ),
                   textAlign: pw.TextAlign.justify,
                   softWrap: true,
                 ),
               ),
             );
-            widgets.add(pw.SizedBox(height: fontSize * (lineSpacing - 1)));
+            widgets.add(pw.SizedBox(height: 6));
           }
         }
 
