@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/stores/auth_store.dart';
 import '../../../core/stores/conversas_store.dart';
+import '../../../core/services/share_intent_service.dart';
 import '../../../core/widgets/neu_container.dart';
 import '../../../core/widgets/wave_background.dart';
 import '../widgets/conversa_tile.dart';
@@ -27,12 +28,14 @@ class _HomeScreenState extends State<HomeScreen> {
       final store = context.read<ConversasStore>();
       store.carregarConversas();
       store.carregarEstatisticas();
+      ShareIntentService.instance.iniciar();
     });
   }
 
   @override
   void dispose() {
     _buscaCtrl.dispose();
+    ShareIntentService.instance.parar();
     super.dispose();
   }
 

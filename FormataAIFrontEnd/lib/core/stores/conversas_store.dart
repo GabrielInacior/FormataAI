@@ -37,6 +37,7 @@ class Mensagem {
   final String conteudo;
   final String? transcricao;
   final String? audioUrl;
+  final String? formato;
   final DateTime criadoEm;
 
   const Mensagem({
@@ -45,6 +46,7 @@ class Mensagem {
     required this.conteudo,
     this.transcricao,
     this.audioUrl,
+    this.formato,
     required this.criadoEm,
   });
 
@@ -54,6 +56,7 @@ class Mensagem {
     conteudo: json['conteudo'] as String? ?? '',
     transcricao: json['transcricao'] as String?,
     audioUrl: json['audioUrl'] as String?,
+    formato: json['formato'] as String?,
     criadoEm: DateTime.parse(json['criadoEm'] as String),
   );
 }
@@ -280,6 +283,7 @@ class ConversasStore extends ChangeNotifier {
             id: DateTime.now().millisecondsSinceEpoch.toString(),
             tipo: 'ASSISTENTE',
             conteudo: data['resposta'] as String,
+            formato: (data['formato'] as String?) ?? (data['categoria'] as String?) ?? formato,
             criadoEm: DateTime.now(),
           ),
         );
@@ -372,6 +376,7 @@ class ConversasStore extends ChangeNotifier {
             id: DateTime.now().millisecondsSinceEpoch.toString(),
             tipo: 'ASSISTENTE',
             conteudo: data['resposta'] as String,
+            formato: (data['formato'] as String?) ?? (data['categoria'] as String?) ?? formato,
             criadoEm: DateTime.now(),
           ),
         );

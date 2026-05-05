@@ -230,6 +230,7 @@ export async function processar(req: Request, res: Response) {
       tipo: 'ASSISTENTE',
       intencao: resultadoIA.intencao,
       conteudo: resultadoIA.resposta || '',
+      formato: formatoEscolhido ?? resultadoIA.categoria ?? undefined,
       tokensUsados,
       modeloUsado: 'gpt-4o-mini',
     });
@@ -267,6 +268,7 @@ export async function processar(req: Request, res: Response) {
       transcricao,
       intencao: resultadoIA.intencao,
       categoria: resultadoIA.categoria,
+      formato: formatoEscolhido ?? resultadoIA.categoria ?? null,
       resposta: resultadoIA.resposta,
       audioUrl: audioUrl || null,
     });
@@ -418,6 +420,7 @@ Responda SEMPRE em JSON com este formato:
       tipo: 'ASSISTENTE',
       intencao: resultadoIA.intencao,
       conteudo: resultadoIA.resposta || '',
+      formato,
       tokensUsados,
       modeloUsado: 'gpt-4o-mini',
     });
@@ -430,6 +433,7 @@ Responda SEMPRE em JSON com este formato:
       transcricao,
       intencao: resultadoIA.intencao,
       categoria: resultadoIA.categoria,
+      formato,
       resposta: resultadoIA.resposta,
     });
   } catch (error) {

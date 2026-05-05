@@ -50,6 +50,7 @@ dependencies:
   pdf: ^3.11.2
   just_audio: ^0.9.43
   shared_preferences: ^2.3.5
+  receive_sharing_intent: ^1.8.1
 
 dev_dependencies:
   flutter_test:

@@ -21,9 +21,14 @@ class ApiService {
   static const _tokenKey = 'auth_token';
 
   void _configurarDio() {
-    final baseUrl = !kIsWeb && Platform.isAndroid
-        ? kApiBaseUrlAndroid
-        : kApiBaseUrlDefault;
+    String baseUrl;
+    if (kReleaseMode) {
+      baseUrl = kApiBaseUrlProd;
+    } else if (!kIsWeb && Platform.isAndroid) {
+      baseUrl = kApiBaseUrlAndroid;
+    } else {
+      baseUrl = kApiBaseUrlDefault;
+    }
 
     _dio.options = BaseOptions(
       baseUrl: baseUrl,

@@ -94,6 +94,7 @@ export async function criarMensagem(dados: {
   transcricao?: string;
   intencao?: string;
   conteudo: string;
+  formato?: string;
   tokensUsados?: number;
   modeloUsado?: string;
 }) {

@@ -96,6 +96,7 @@ model Mensagem {
   transcricao   String?
   intencao      String?
   conteudo      String        @default("")
+  formato       String?
   tokensUsados  Int           @default(0) @map("tokens_usados")
   modeloUsado   String        @default("gpt-4o-mini") @map("modelo_usado")
   criadoEm      DateTime      @default(now()) @map("criado_em")

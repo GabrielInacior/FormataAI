@@ -31,6 +31,8 @@ class _MensagemBubbleState extends State<MensagemBubble> {
   bool _isPlaying = false;
   Duration _position = Duration.zero;
   Duration _duration = Duration.zero;
+  bool _exportandoPdf = false;
+  bool _compartilhando = false;
 
   Mensagem get mensagem => widget.mensagem;
   bool get _isUsuario => mensagem.tipo == 'USUARIO';
@@ -465,6 +467,10 @@ class _MensagemBubbleState extends State<MensagemBubble> {
 
   /// Bubble padrão para mensagens do assistente.
   Widget _buildAssistantBubble(BuildContext context, bool isDark) {
+    if (mensagem.formato == 'DOCUMENTO') {
+      return _buildDocumentoBubble(context, isDark);
+    }
+
     return NeuContainer(
       borderRadius: 16,
       padding: const EdgeInsets.all(14),
@@ -498,13 +504,198 @@ class _MensagemBubbleState extends State<MensagemBubble> {
                   label: 'Compartilhar',
                   onTap: widget.onCompartilhar,
                 ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Card para mensagens do tipo DOCUMENTO — entrega diretamente o PDF ABNT.
+  Widget _buildDocumentoBubble(BuildContext context, bool isDark) {
+    final store = context.read<ConversasStore>();
+    final titulo = store.conversaAtual?.titulo ?? 'Documento';
+
+    return NeuContainer(
+      borderRadius: 16,
+      padding: const EdgeInsets.all(16),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.75,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Cabeçalho
+            Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: AppColors.accent.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.picture_as_pdf_rounded,
+                    color: AppColors.accent,
+                    size: 22,
+                  ),
+                ),
                 const SizedBox(width: 12),
-                _AcaoBtn(
-                  icon: Icons.picture_as_pdf_rounded,
-                  label: 'PDF',
-                  onTap: () => exportarParaPdf(conteudo: mensagem.conteudo),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Documento gerado',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? AppColors.darkText : AppColors.lightText,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Formatado com normas ABNT',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.lightTextSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
+            ),
+            const SizedBox(height: 14),
+            // Botão Baixar
+            SizedBox(
+              width: double.infinity,
+              child: GestureDetector(
+                onTap: _exportandoPdf
+                    ? null
+                    : () async {
+                        setState(() => _exportandoPdf = true);
+                        try {
+                          final path = await baixarPdfAbnt(
+                            conteudo: mensagem.conteudo,
+                            titulo: titulo,
+                          );
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'PDF salvo: ${path.split('/').last}',
+                                ),
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                duration: const Duration(seconds: 3),
+                              ),
+                            );
+                          }
+                        } finally {
+                          if (mounted) setState(() => _exportandoPdf = false);
+                        }
+                      },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 11),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [AppColors.accent, AppColors.primaryDark],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: _exportandoPdf
+                      ? const Center(
+                          child: SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation(Colors.white),
+                            ),
+                          ),
+                        )
+                      : const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.download_rounded, color: Colors.white, size: 17),
+                            SizedBox(width: 7),
+                            Text(
+                              'Baixar PDF',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            // Botão Compartilhar
+            SizedBox(
+              width: double.infinity,
+              child: GestureDetector(
+                onTap: _compartilhando
+                    ? null
+                    : () async {
+                        setState(() => _compartilhando = true);
+                        try {
+                          await compartilharPdfAbnt(
+                            conteudo: mensagem.conteudo,
+                            titulo: titulo,
+                          );
+                        } finally {
+                          if (mounted) setState(() => _compartilhando = false);
+                        }
+                      },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 11),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: AppColors.accent.withValues(alpha: 0.4),
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: _compartilhando
+                      ? Center(
+                          child: SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation(AppColors.accent),
+                            ),
+                          ),
+                        )
+                      : const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.share_rounded, color: AppColors.accent, size: 17),
+                            SizedBox(width: 7),
+                            Text(
+                              'Compartilhar',
+                              style: TextStyle(
+                                color: AppColors.accent,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                ),
+              ),
             ),
           ],
         ),
