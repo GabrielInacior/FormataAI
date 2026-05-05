@@ -8,7 +8,9 @@
 
 <!-- ▼ ADICIONE O LINK DO VÍDEO AQUI ▼ -->
 
-> (https://github.com/user-attachments/assets/59bb28ea-5d5d-493f-81f5-4e3d2890c9da)
+> https://github.com/user-attachments/assets/245c52c1-b264-469d-b281-bc5e85547d2c
+
+
 >
 > O vídeo percorre o fluxo completo: gravação de áudio → transcrição pelo Whisper → formatação pelo GPT-4o-mini → compartilhamento do resultado.
 
@@ -91,7 +93,8 @@ O diagrama de classes completo com fluxo de dados está disponível em [`diagram
 <!-- Arraste a imagem para este arquivo no editor do GitHub, ou use o caminho relativo: -->
 <!-- ![Diagrama de Classes e Fluxo de Dados do Backend – FormataAI](./assets/diagrama-classes.png) -->
 
-> _Imagem do diagrama em breve._
+><img width="1536" height="1024" alt="DiagramaFormataAI" src="https://github.com/user-attachments/assets/ab398784-8142-410d-9645-178aa6440905" />
+
 
 <!-- ▲ ————————————————————————————————— ▲ -->
 
