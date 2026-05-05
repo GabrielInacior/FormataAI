@@ -8,11 +8,13 @@
 
 <!-- ▼ ADICIONE O LINK DO VÍDEO AQUI ▼ -->
 
-> **Vídeo de demonstração:** _em breve_
+> [**Vídeo de demonstração:** _em breve_](https://github.com/user-attachments/assets/59bb28ea-5d5d-493f-81f5-4e3d2890c9da)
 >
 > O vídeo percorre o fluxo completo: gravação de áudio → transcrição pelo Whisper → formatação pelo GPT-4o-mini → compartilhamento do resultado.
 
 <!-- ▲ ————————————————————————— ▲ -->
+
+
 
 ---
 
