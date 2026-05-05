@@ -279,7 +279,7 @@ export async function processar(req: Request, res: Response) {
 }
 
 /**
- * Reprocessa uma transcrição existente com um novo formato.
+ * Reprocessa uma transcrição existente com um novo formato..
  * Body: { mensagemId: string, formato: string }
  */
 export async function reprocessar(req: Request, res: Response) {
