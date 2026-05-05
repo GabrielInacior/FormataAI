@@ -99,8 +99,11 @@ Future<File> _gerarArquivoPdfAbnt({
   );
 
   // ── Corpo do documento ────────────────────────────────────────────────────
+  // Remove formatação markdown antes de processar o conteúdo
+  final conteudoLimpo = _limparMarkdown(conteudo);
+
   // Divide o conteúdo em parágrafos e seções
-  final linhas = conteudo.split('\n');
+  final linhas = conteudoLimpo.split('\n');
 
   doc.addPage(
     pw.MultiPage(
@@ -214,15 +217,36 @@ Future<void> compartilharPdfAbnt({
   );
 }
 
+/// Remove formatação markdown do texto, preservando o conteúdo.
+String _limparMarkdown(String texto) {
+  return texto
+      // **negrito** → texto
+      .replaceAllMapped(RegExp(r'\*\*(.+?)\*\*'), (m) => m.group(1)!)
+      // *itálico* → texto
+      .replaceAllMapped(RegExp(r'\*(.+?)\*'), (m) => m.group(1)!)
+      // __negrito__ e _itálico_
+      .replaceAllMapped(RegExp(r'__(.+?)__'), (m) => m.group(1)!)
+      .replaceAllMapped(RegExp(r'_(.+?)_'), (m) => m.group(1)!)
+      // ## Cabeçalhos → texto limpo
+      .replaceAll(RegExp(r'^#{1,6}\s+', multiLine: true), '')
+      // > citação
+      .replaceAll(RegExp(r'^>\s*', multiLine: true), '')
+      // `código`
+      .replaceAllMapped(RegExp(r'`+(.+?)`+'), (m) => m.group(1)!)
+      // --- separadores horizontais
+      .replaceAll(RegExp(r'^[-_*]{3,}\s*$', multiLine: true), '')
+      .trim();
+}
+
 bool _isTituloSecao(String texto) {
-  if (texto.length > 80) return false;
-  if (!texto.endsWith('.') && !texto.endsWith(',') && !texto.endsWith(';')) {
-    // Linha curta sem pontuação de encerramento — provavelmente título
-    final palavras = texto.split(' ').length;
-    if (palavras <= 8) return true;
-  }
-  // Ou começa com número seguido de ponto/espaço (ex: "1. Introdução")
-  if (RegExp(r'^\d+[\.\s]').hasMatch(texto)) return true;
+  // Seção numerada: "1.", "1)", "2.1", etc.
+  if (RegExp(r'^\d+[\.\)\-]').hasMatch(texto)) return true;
+  // Linha curta inteiramente em MAIÚSCULAS (ex: "INTRODUÇÃO", "CONCLUSÃO")
+  final semEspacos = texto.replaceAll(' ', '');
+  if (texto.length <= 50 &&
+      semEspacos.length > 2 &&
+      texto == texto.toUpperCase() &&
+      RegExp(r'[A-ZÁÀÃÂÉÊÍÓÔÕÚÇ]').hasMatch(texto)) return true;
   return false;
 }
 

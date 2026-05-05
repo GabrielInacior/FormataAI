@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -140,7 +141,13 @@ class ShareIntentService {
     context.go('/conversa/${conversa.id}');
 
     unawaited(
-      store.processarAudio(path, conversaId: conversa.id, formato: formato),
+      store
+          .processarAudio(path, conversaId: conversa.id, formato: formato)
+          .catchError((e) {
+        // Erro capturado aqui pois processarAudio é unawaited.
+        // O store já define _erro internamente; este catch evita unhandled exception.
+        debugPrint('[ShareIntent] Erro ao processar áudio compartilhado: $e');
+      }),
     );
 
     // Marca o intent como consumido para não processar de novo

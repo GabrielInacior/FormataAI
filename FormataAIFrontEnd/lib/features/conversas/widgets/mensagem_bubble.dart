@@ -32,7 +32,6 @@ class _MensagemBubbleState extends State<MensagemBubble> {
   Duration _position = Duration.zero;
   Duration _duration = Duration.zero;
   bool _exportandoPdf = false;
-  bool _compartilhando = false;
 
   Mensagem get mensagem => widget.mensagem;
   bool get _isUsuario => mensagem.tipo == 'USUARIO';
@@ -574,7 +573,7 @@ class _MensagemBubbleState extends State<MensagemBubble> {
               ],
             ),
             const SizedBox(height: 14),
-            // Botão Baixar
+            // Botão Salvar / Compartilhar PDF (abre share sheet do Android — usuário pode salvar em Downloads, Drive, etc.)
             SizedBox(
               width: double.infinity,
               child: GestureDetector(
@@ -583,21 +582,20 @@ class _MensagemBubbleState extends State<MensagemBubble> {
                     : () async {
                         setState(() => _exportandoPdf = true);
                         try {
-                          final path = await baixarPdfAbnt(
+                          await compartilharPdfAbnt(
                             conteudo: mensagem.conteudo,
                             titulo: titulo,
                           );
+                        } catch (e) {
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(
-                                  'PDF salvo: ${path.split('/').last}',
-                                ),
+                                content: Text('Erro ao gerar PDF: $e'),
                                 behavior: SnackBarBehavior.floating,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                duration: const Duration(seconds: 3),
+                                duration: const Duration(seconds: 4),
                               ),
                             );
                           }
@@ -636,70 +634,9 @@ class _MensagemBubbleState extends State<MensagemBubble> {
                             ),
                             SizedBox(width: 7),
                             Text(
-                              'Baixar PDF',
+                              'Salvar / Compartilhar PDF',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            // Botão Compartilhar
-            SizedBox(
-              width: double.infinity,
-              child: GestureDetector(
-                onTap: _compartilhando
-                    ? null
-                    : () async {
-                        setState(() => _compartilhando = true);
-                        try {
-                          await compartilharPdfAbnt(
-                            conteudo: mensagem.conteudo,
-                            titulo: titulo,
-                          );
-                        } finally {
-                          if (mounted) setState(() => _compartilhando = false);
-                        }
-                      },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 11),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: AppColors.accent.withValues(alpha: 0.4),
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: _compartilhando
-                      ? Center(
-                          child: SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation(
-                                AppColors.accent,
-                              ),
-                            ),
-                          ),
-                        )
-                      : const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.share_rounded,
-                              color: AppColors.accent,
-                              size: 17,
-                            ),
-                            SizedBox(width: 7),
-                            Text(
-                              'Compartilhar',
-                              style: TextStyle(
-                                color: AppColors.accent,
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                               ),
