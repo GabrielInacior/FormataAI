@@ -1,5 +1,6 @@
 import 'dart:async';
-import 'dart:io';import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -18,7 +19,16 @@ const _allowedMimes = [
 ];
 
 const _allowedExts = [
-  'm4a', 'mp3', 'wav', 'aac', 'ogg', 'webm', 'mp4', 'flac', 'opus', 'wma',
+  'm4a',
+  'mp3',
+  'wav',
+  'aac',
+  'ogg',
+  'webm',
+  'mp4',
+  'flac',
+  'opus',
+  'wma',
 ];
 
 /// Gerencia o recebimento de arquivos compartilhados de outros apps.
@@ -72,7 +82,9 @@ class ShareIntentService {
           ),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           duration: const Duration(seconds: 4),
         ),
       );
@@ -113,7 +125,9 @@ class ShareIntentService {
           ),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       );
       return;

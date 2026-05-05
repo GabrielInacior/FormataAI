@@ -553,7 +553,9 @@ class _MensagemBubbleState extends State<MensagemBubble> {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: isDark ? AppColors.darkText : AppColors.lightText,
+                          color: isDark
+                              ? AppColors.darkText
+                              : AppColors.lightText,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -627,7 +629,11 @@ class _MensagemBubbleState extends State<MensagemBubble> {
                       : const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.download_rounded, color: Colors.white, size: 17),
+                            Icon(
+                              Icons.download_rounded,
+                              color: Colors.white,
+                              size: 17,
+                            ),
                             SizedBox(width: 7),
                             Text(
                               'Baixar PDF',
@@ -675,14 +681,20 @@ class _MensagemBubbleState extends State<MensagemBubble> {
                             height: 18,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation(AppColors.accent),
+                              valueColor: AlwaysStoppedAnimation(
+                                AppColors.accent,
+                              ),
                             ),
                           ),
                         )
                       : const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.share_rounded, color: AppColors.accent, size: 17),
+                            Icon(
+                              Icons.share_rounded,
+                              color: AppColors.accent,
+                              size: 17,
+                            ),
                             SizedBox(width: 7),
                             Text(
                               'Compartilhar',

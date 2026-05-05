@@ -283,7 +283,10 @@ class ConversasStore extends ChangeNotifier {
             id: DateTime.now().millisecondsSinceEpoch.toString(),
             tipo: 'ASSISTENTE',
             conteudo: data['resposta'] as String,
-            formato: (data['formato'] as String?) ?? (data['categoria'] as String?) ?? formato,
+            formato:
+                (data['formato'] as String?) ??
+                (data['categoria'] as String?) ??
+                formato,
             criadoEm: DateTime.now(),
           ),
         );
@@ -376,7 +379,10 @@ class ConversasStore extends ChangeNotifier {
             id: DateTime.now().millisecondsSinceEpoch.toString(),
             tipo: 'ASSISTENTE',
             conteudo: data['resposta'] as String,
-            formato: (data['formato'] as String?) ?? (data['categoria'] as String?) ?? formato,
+            formato:
+                (data['formato'] as String?) ??
+                (data['categoria'] as String?) ??
+                formato,
             criadoEm: DateTime.now(),
           ),
         );

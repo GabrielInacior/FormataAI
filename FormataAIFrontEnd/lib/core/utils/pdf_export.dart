@@ -30,10 +30,21 @@ Future<File> _gerarArquivoPdfAbnt({
   // Data formatada para a capa
   final now = DateTime.now();
   const meses = [
-    'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
-    'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro',
+    'janeiro',
+    'fevereiro',
+    'março',
+    'abril',
+    'maio',
+    'junho',
+    'julho',
+    'agosto',
+    'setembro',
+    'outubro',
+    'novembro',
+    'dezembro',
   ];
-  final dataFormatada = '${now.day.toString().padLeft(2, '0')} de ${meses[now.month - 1]} de ${now.year}';
+  final dataFormatada =
+      '${now.day.toString().padLeft(2, '0')} de ${meses[now.month - 1]} de ${now.year}';
 
   // ── Capa ABNT ─────────────────────────────────────────────────────────────
   doc.addPage(
@@ -52,10 +63,7 @@ Future<File> _gerarArquivoPdfAbnt({
           // Instituição (topo)
           pw.Text(
             'FormataAI',
-            style: pw.TextStyle(
-              font: fontBold,
-              fontSize: 14,
-            ),
+            style: pw.TextStyle(font: fontBold, fontSize: 14),
             textAlign: pw.TextAlign.center,
           ),
 
@@ -64,10 +72,7 @@ Future<File> _gerarArquivoPdfAbnt({
             children: [
               pw.Text(
                 titulo.toUpperCase(),
-                style: pw.TextStyle(
-                  font: fontBold,
-                  fontSize: 14,
-                ),
+                style: pw.TextStyle(font: fontBold, fontSize: 14),
                 textAlign: pw.TextAlign.center,
               ),
             ],
@@ -135,10 +140,7 @@ Future<File> _gerarArquivoPdfAbnt({
             widgets.add(
               pw.Text(
                 trimmed.toUpperCase(),
-                style: pw.TextStyle(
-                  font: fontBold,
-                  fontSize: fontSize,
-                ),
+                style: pw.TextStyle(font: fontBold, fontSize: fontSize),
               ),
             );
             widgets.add(pw.SizedBox(height: 6));
@@ -146,13 +148,12 @@ Future<File> _gerarArquivoPdfAbnt({
             // Parágrafo normal: recuo de 1,25cm na primeira linha
             widgets.add(
               pw.Padding(
-                padding: const pw.EdgeInsets.only(left: 1.25 * PdfPageFormat.cm),
+                padding: const pw.EdgeInsets.only(
+                  left: 1.25 * PdfPageFormat.cm,
+                ),
                 child: pw.Text(
                   trimmed,
-                  style: pw.TextStyle(
-                    font: fontNormal,
-                    fontSize: fontSize,
-                  ),
+                  style: pw.TextStyle(font: fontNormal, fontSize: fontSize),
                   textAlign: pw.TextAlign.justify,
                   softWrap: true,
                 ),
@@ -184,7 +185,10 @@ Future<String> baixarPdfAbnt({
   required String conteudo,
   required String titulo,
 }) async {
-  final tempFile = await _gerarArquivoPdfAbnt(conteudo: conteudo, titulo: titulo);
+  final tempFile = await _gerarArquivoPdfAbnt(
+    conteudo: conteudo,
+    titulo: titulo,
+  );
 
   // Tenta salvar no armazenamento externo do app (sem permissão extra necessária)
   final externalDir = await getExternalStorageDirectory();
@@ -277,4 +281,3 @@ Future<void> exportarParaPdf({
 
   await SharePlus.instance.share(ShareParams(files: [XFile(file.path)]));
 }
-
