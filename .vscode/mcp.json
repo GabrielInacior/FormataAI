@@ -5,11 +5,15 @@
       "args": ["--access-mode=unrestricted"],
       "env": {
         "DATABASE_URI": "postgresql://postgres:Inacio123@localhost:5432/formataAI"
-      },    
+      }
     },
-      "playwright": {
+    "playwright": {
       "command": "npx",
       "args": ["@playwright/mcp@latest"]
-    }  
+    },
+    "ssh": {
+      "command": "npx",
+      "args": ["-y", "mcp-server-ssh"]
+    }
   }
 }
