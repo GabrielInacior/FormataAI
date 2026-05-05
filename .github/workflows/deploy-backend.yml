@@ -2,10 +2,10 @@
 # FormataAI Backend — CI/CD para AWS EC2
 # =====================================================
 # Secrets necessários no GitHub:
-#   EC2_HOST          — IP público da EC2 (ex: 3.144.149.164)
+#   EC2_HOST          — IP público da EC2 (ex: 3.12.209.26)
 #   EC2_USER          — ubuntu
-#   EC2_SSH_KEY       — Conteúdo COMPLETO da chave .pem privada
-#                       (incluindo -----BEGIN e END-----)
+#   EC2_SSH_KEY       — Conteúdo completo da chave privada ed25519
+#                       (-----BEGIN OPENSSH PRIVATE KEY----- ... -----END-----)
 # =====================================================
 name: Deploy Backend EC2
 
@@ -14,6 +14,11 @@ on:
     branches: [main]
     paths:
       - "FormataAIBackend/**"
+
+env:
+  SSH_HOST: ${{ secrets.EC2_HOST }}
+  SSH_PORT: 22
+  SSH_USER: ${{ secrets.EC2_USER }}
 
 defaults:
   run:
@@ -43,14 +48,21 @@ jobs:
     if: github.ref == 'refs/heads/main'
 
     steps:
+      - name: Setup SSH key
+        shell: bash
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -p "$SSH_PORT" -H "$SSH_HOST" >> ~/.ssh/known_hosts
+
       - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          command_timeout: 10m
-          script: |
+        shell: bash
+        run: |
+          ssh -o StrictHostKeyChecking=no -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" << 'ENDSSH'
             set -e
             cd /opt/formataai/FormataAI
 
@@ -72,7 +84,9 @@ jobs:
                 break
               fi
               if [ "$i" = "24" ]; then
-                echo "Timeout aguardando container" && docker-compose logs app --tail=50 && exit 1
+                echo "Timeout aguardando container"
+                docker-compose logs app --tail=50
+                exit 1
               fi
               sleep 5
             done
@@ -83,4 +97,6 @@ jobs:
             # Limpar imagens antigas
             docker image prune -f
 
-            echo "✅ Deploy concluído!"
+            echo "Deploy concluido!"
+          ENDSSH
+
