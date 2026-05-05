@@ -49,7 +49,9 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          command_timeout: 10m
           script: |
+            set -e
             cd /opt/formataai/FormataAI
 
             # Pull alterações
@@ -58,11 +60,22 @@ jobs:
             cd FormataAIBackend
 
             # Rebuild e restart containers
-            docker-compose down
+            docker-compose down --remove-orphans
             docker-compose up -d --build
 
-            # Aguardar container subir
-            sleep 5
+            # Aguardar container app ficar saudável (até 120s)
+            echo "Aguardando container app..."
+            for i in $(seq 1 24); do
+              STATUS=$(docker inspect --format='{{.State.Status}}' formataai-backend 2>/dev/null || echo "missing")
+              if [ "$STATUS" = "running" ]; then
+                echo "Container up após $((i*5))s"
+                break
+              fi
+              if [ "$i" = "24" ]; then
+                echo "Timeout aguardando container" && docker-compose logs app --tail=50 && exit 1
+              fi
+              sleep 5
+            done
 
             # Rodar migrations pendentes
             docker-compose exec -T app npx prisma migrate deploy
